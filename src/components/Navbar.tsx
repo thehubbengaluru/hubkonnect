@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, UserCircle, Compass, Bell, Menu, X } from "lucide-react";
+import { Users, UserCircle, Compass, Bell, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navItems = [
   { to: "/for-you", label: "For You", icon: Compass },
@@ -12,6 +13,7 @@ const navItems = [
 const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
 
   return (
     <>
@@ -48,9 +50,25 @@ const Navbar = () => {
           </nav>
 
           <div className="flex items-center gap-2">
+            {user && profile?.avatar_url && (
+              <div className="h-8 w-8 border-2 border-foreground overflow-hidden">
+                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+              </div>
+            )}
             <Button variant="ghost" size="icon" className="relative border-2 border-transparent hover:border-foreground">
               <Bell className="h-5 w-5" />
             </Button>
+            {user && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden md:flex border-2 border-transparent hover:border-foreground"
+                onClick={signOut}
+                title="Sign out"
+              >
+                <LogOut className="h-5 w-5" />
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -75,6 +93,15 @@ const Navbar = () => {
                 </Button>
               </Link>
             ))}
+            {user && (
+              <Button
+                variant="ghost"
+                onClick={() => { signOut(); setMobileOpen(false); }}
+                className="w-full justify-start gap-2 font-mono text-xs uppercase tracking-wider border-2 border-foreground shadow-brutal-sm mb-2 text-destructive"
+              >
+                <LogOut className="h-4 w-4" /> Sign Out
+              </Button>
+            )}
           </div>
         )}
       </header>

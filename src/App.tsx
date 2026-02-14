@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -22,18 +24,36 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/matches" element={<FirstMatches />} />
-          <Route path="/for-you" element={<ForYou />} />
-          <Route path="/connections" element={<Connections />} />
-          <Route path="/profile" element={<MyProfile />} />
-          <Route path="/profile/:id" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/onboarding" element={
+              <ProtectedRoute requireOnboarding={false}>
+                <Onboarding />
+              </ProtectedRoute>
+            } />
+            <Route path="/matches" element={
+              <ProtectedRoute requireOnboarding={false}>
+                <FirstMatches />
+              </ProtectedRoute>
+            } />
+            <Route path="/for-you" element={
+              <ProtectedRoute><ForYou /></ProtectedRoute>
+            } />
+            <Route path="/connections" element={
+              <ProtectedRoute><Connections /></ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute><MyProfile /></ProtectedRoute>
+            } />
+            <Route path="/profile/:id" element={
+              <ProtectedRoute><Profile /></ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
