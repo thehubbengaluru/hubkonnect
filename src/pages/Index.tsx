@@ -26,34 +26,39 @@ const Index = () => {
     <div className="min-h-screen flex flex-col">
       {/* Hero */}
       <section className="relative flex flex-col items-center justify-center min-h-[85vh] px-4 overflow-hidden">
-        {/* Background circles */}
-        <ConcentricCircles className="absolute inset-0 w-full h-full text-primary pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-b from-secondary/60 via-background/80 to-background pointer-events-none" />
+        <ConcentricCircles className="absolute inset-0 w-full h-full text-foreground pointer-events-none" />
 
-        <div className="relative z-10 text-center max-w-2xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent rounded-full px-4 py-1.5 text-sm font-medium font-accent">
-            <Sparkles className="h-4 w-4" />
-            The Hub Bengaluru
+        <div className="relative z-10 text-center max-w-3xl mx-auto space-y-8">
+          <div className="inline-block border-2 border-foreground bg-accent px-4 py-1.5 shadow-brutal-sm">
+            <span className="text-sm font-mono font-bold uppercase tracking-wider">
+              The Hub Bengaluru
+            </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-foreground leading-tight">
-            Your next collaboration
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading uppercase leading-[0.9]">
+            Your next
             <br />
-            <span className="text-accent">is already here</span>
+            <span className="relative inline-block">
+              collab
+              <span className="absolute -bottom-2 left-0 right-0 h-3 bg-accent -z-10" />
+            </span>
+            {" "}is
+            <br />
+            already here
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-md mx-auto">
-            Connect with the right people at The Hub. Get matched based on skills, interests, and goals — not chance.
+          <p className="text-lg font-mono text-muted-foreground max-w-lg mx-auto">
+            Connect with the right people at The Hub. Matched by skills, interests, and goals — not chance.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link to="/auth">
-              <Button size="lg" className="gap-2 rounded-button font-semibold px-8">
-                Get Started <ArrowRight className="h-4 w-4" />
+              <Button size="lg" className="gap-2 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider px-8 h-14 text-base">
+                Get Started <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <Link to="/auth">
-              <Button variant="outline" size="lg" className="rounded-button font-semibold px-8">
+              <Button variant="outline" size="lg" className="border-2 border-foreground shadow-brutal-sm hover:bg-accent hover:shadow-brutal transition-all font-mono font-bold uppercase tracking-wider px-8 h-14 text-base">
                 Sign In
               </Button>
             </Link>
@@ -62,33 +67,52 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="py-20 px-4 bg-secondary/50">
-        <div className="container max-w-4xl">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Connecting the dots
+      <section className="py-20 px-4 bg-secondary border-t-2 border-foreground">
+        <div className="container max-w-5xl">
+          <h2 className="text-4xl md:text-5xl font-heading uppercase text-center mb-16">
+            Connecting<br />the dots
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((f) => (
+          <div className="grid md:grid-cols-3 gap-6">
+            {features.map((f, i) => (
               <div
                 key={f.title}
-                className="bg-card rounded-card p-6 shadow-card hover:shadow-card-hover transition-shadow"
+                className={`border-2 border-foreground p-6 shadow-brutal hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all ${
+                  i === 1 ? "bg-accent" : "bg-card"
+                }`}
               >
-                <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                  <f.icon className="h-5 w-5 text-accent" />
+                <div className="h-12 w-12 border-2 border-foreground flex items-center justify-center mb-4 bg-background">
+                  <f.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-                <p className="text-muted-foreground text-sm">{f.description}</p>
+                <h3 className="font-heading text-xl uppercase mb-3">{f.title}</h3>
+                <p className="font-mono text-sm text-muted-foreground leading-relaxed">{f.description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* CTA band */}
+      <section className="bg-foreground text-primary-foreground py-16 px-4 border-t-2 border-foreground">
+        <div className="container max-w-3xl text-center space-y-6">
+          <h2 className="text-3xl md:text-4xl font-heading uppercase">
+            Stop networking by accident
+          </h2>
+          <p className="font-mono text-primary-foreground/70 max-w-md mx-auto">
+            Join 200+ community members already making intentional connections.
+          </p>
+          <Link to="/auth">
+            <Button size="lg" className="bg-accent text-accent-foreground border-2 border-accent shadow-brutal-accent hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all font-mono font-bold uppercase tracking-wider px-10 h-14 text-base">
+              Join the community
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="py-8 px-4 text-center text-sm text-muted-foreground border-t">
-        <p>
+      <footer className="py-8 px-4 text-center border-t-2 border-foreground">
+        <p className="font-mono text-sm text-muted-foreground">
           Built with ❤️ for{" "}
-          <span className="font-accent font-semibold text-foreground">The Hub Bengaluru</span>{" "}
+          <span className="font-bold text-foreground">The Hub Bengaluru</span>{" "}
           community
         </p>
       </footer>
