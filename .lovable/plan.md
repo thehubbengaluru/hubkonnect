@@ -1,126 +1,113 @@
 
 
-# Community Connector - Implementation Plan
+# Database Schema, Auth & Protected Routes
 
 ## Overview
-A smart networking platform for The Hub Bengaluru that matches community members based on skills, interests, and goals. Members create profiles, get AI-powered match suggestions, and send connection requests — turning random encounters into intentional collaborations.
+Set up the complete backend: database tables with RLS, auth session management, protected routes, and wire onboarding to persist data. All screens currently use mock data -- this plan creates the real data layer.
 
----
+## Phase 1: Database Schema (Migration)
 
-## Phase 1: Foundation & Design System
+### Tables to create:
 
-### Brand & Theme Setup
-- Implement The Hub's color palette (Deep Blue #1A2B49, Vibrant Orange #FF6B35, Warm Yellow #FFB84D, Fresh Teal #00C2A8)
-- Set up Inter font for headings/body and Space Grotesk for accents
-- Create concentric circle SVG background patterns representing "Connecting the dots"
-- Establish consistent border-radius (12px cards, 8px buttons, 24px avatars) and shadow system
+**profiles** -- one row per user, auto-created on signup
+- `id` (uuid, PK, references auth.users ON DELETE CASCADE)
+- `full_name` (text, not null)
+- `bio` (text, default '')
+- `instagram` (text, default '')
+- `linkedin` (text, default '')
+- `avatar_url` (text, default '')
+- `privacy` (text, default 'public') -- public | members | private
+- `onboarding_completed` (boolean, default false)
+- `created_at` (timestamptz, default now())
+- `updated_at` (timestamptz, default now())
 
-### Core Layout
-- Fixed navigation bar with logo, For You, Connections, and Profile links
-- Mobile-responsive bottom navigation
-- Page transition animations
+**profile_member_types** -- junction table
+- `id` (uuid, PK, default gen_random_uuid())
+- `profile_id` (uuid, references profiles ON DELETE CASCADE)
+- `member_type` (text, not null) -- co_living, co_working, event_attendee, follower
+- unique(profile_id, member_type)
 
----
+**profile_skills** -- junction table
+- `id` (uuid, PK, default gen_random_uuid())
+- `profile_id` (uuid, references profiles ON DELETE CASCADE)
+- `skill` (text, not null)
+- unique(profile_id, skill)
 
-## Phase 2: Authentication & Database (Supabase)
+**profile_interests** -- junction table
+- `id` (uuid, PK, default gen_random_uuid())
+- `profile_id` (uuid, references profiles ON DELETE CASCADE)
+- `interest` (text, not null)
+- unique(profile_id, interest)
 
-### User Authentication
-- Email/password signup and login
-- Protected routes — login required to view any profiles
+**profile_looking_for** -- junction table
+- `id` (uuid, PK, default gen_random_uuid())
+- `profile_id` (uuid, references profiles ON DELETE CASCADE)
+- `looking_for` (text, not null) -- collaborators, mentors, etc.
+- unique(profile_id, looking_for)
 
-### Database Schema
-- **profiles** table: name, bio (150 chars), photo URL, instagram, linkedin, member type (co-living/co-working/event attendee/follower)
-- **skills**, **interests**, **looking_for_options** reference tables with predefined data
-- **user_skills**, **user_interests**, **user_looking_for** junction tables
-- **connections** table: requester, receiver, status (pending/accepted/declined), message, timestamps
-- Row-Level Security policies so users can only edit their own data and view public profiles
-- Profile photo uploads via Supabase Storage
+**connections** -- connection requests between users
+- `id` (uuid, PK, default gen_random_uuid())
+- `requester_id` (uuid, references profiles ON DELETE CASCADE, not null)
+- `receiver_id` (uuid, references profiles ON DELETE CASCADE, not null)
+- `status` (text, default 'pending') -- pending, accepted, declined
+- `message` (text, default '')
+- `created_at` (timestamptz, default now())
+- `updated_at` (timestamptz, default now())
+- unique(requester_id, receiver_id)
 
----
+### Storage bucket
+- `avatars` -- public bucket for profile photos
 
-## Phase 3: Onboarding Flow
+### Trigger
+- Auto-create profile row when a new user signs up (pulls `full_name` from `raw_user_meta_data`)
+- Auto-update `updated_at` on profiles changes
 
-### 3-Step Profile Setup
-1. **Basics** — Photo upload, full name, bio (with character counter), member type selection (pill buttons)
-2. **Skills & Interests** — Multi-select tag picker from predefined lists (Design, Development, Content, Marketing, etc.) with search/filter
-3. **Looking For** — Multi-select: Collaborators, Mentors, Opportunities, Friends, Feedback, Co-founders, Learning Partners
+### RLS Policies (all tables)
+- **profiles**: Anyone authenticated can SELECT (respecting privacy later in app logic). Users can UPDATE/INSERT only their own row.
+- **junction tables** (skills, interests, member_types, looking_for): Authenticated users can SELECT all. INSERT/DELETE only own rows (where profile_id = auth.uid()).
+- **connections**: Authenticated users can SELECT where they are requester or receiver. INSERT only where requester_id = auth.uid(). UPDATE only where receiver_id = auth.uid() (to accept/decline). DELETE only own sent requests.
 
-- Progress bar at top showing current step
-- Skip option available, with "Next" to proceed
-- Target: complete in under 2 minutes
+## Phase 2: Auth Context & Session Management
 
----
+Create `src/contexts/AuthContext.tsx`:
+- Wraps app with auth state via `onAuthStateChange` + `getSession`
+- Exposes `user`, `session`, `profile`, `loading`, `signOut`
+- Fetches the profile row after auth state resolves
+- Provides `refreshProfile()` for post-onboarding updates
 
-## Phase 4: Smart Matching ("For You" Feed)
+## Phase 3: Protected Routes
 
-### Match Algorithm
-- Weighted scoring: Shared Skills (×2) + Shared Interests (×1.5) + Complementary "Looking For" (×3) + Same Member Type (×1) + Activity Bonus (×0.5)
-- Normalize to percentage (e.g., "85% Match")
-- Display match reasons: "Shared: Photography, Design • Both looking for collaborators"
+Create `src/components/ProtectedRoute.tsx`:
+- Redirects to `/login` if not authenticated
+- Redirects to `/onboarding` if authenticated but `onboarding_completed = false`
+- Shows loading skeleton while auth resolves
 
-### For You Page
-- Hero section with concentric circle background: "Your next collaboration is already here"
-- Filter tabs: All, Co-living, Co-working, Events
-- Sort options: Best Match, Recent, Most Active
-- Grid of profile cards (4 columns desktop, 1 column mobile)
+Update `App.tsx`:
+- Wrap `/for-you`, `/connections`, `/profile`, `/profile/:id`, `/onboarding`, `/matches` with ProtectedRoute
+- Onboarding route skips the "must complete onboarding" check
 
-### Profile Card Design
-- Circular profile photo, name, handle, bio (2 lines)
-- Skills shown as orange pill tags
-- Teal match percentage badge
-- Match reason text
-- "Connect" and "Not Now" action buttons
+## Phase 4: Wire Up Onboarding
 
----
+Update `Onboarding.tsx`:
+- On final step completion, save all data to database:
+  - Upload photo to `avatars` bucket, save URL to profile
+  - Update profile row (full_name, bio, instagram, linkedin)
+  - Insert rows into junction tables (skills, interests, member_types, looking_for)
+  - Set `onboarding_completed = true`
 
-## Phase 5: Connection System
+## Phase 5: Wire Up Existing Pages
 
-### Connection Requests
-- "Connect" button opens modal with optional message (200 chars): "Why do you want to connect?"
-- Rate limit: max 10 requests per day
-- Notification indicators in nav bar
+- **Login/Signup**: Already wired to Supabase auth -- just update redirects (login goes to `/for-you`, signup success message stays)
+- **Navbar**: Add sign-out button, show user avatar
+- **ForYou**: Fetch real profiles from DB instead of mock data
+- **Connections**: Fetch real connections/requests from DB
+- **MyProfile**: Load/save from DB instead of local state
+- **Profile/:id**: Fetch profile by ID from DB
 
-### Connection Management Pages
-- **Sent Requests** — Pending outbound requests with status
-- **Received Requests** — Inbound requests with Accept/Decline buttons
-- **My Connections** — All accepted connections with profile details and contact info (Instagram/LinkedIn links visible after connection)
+## Technical Notes
 
-### Connection Flow
-- Request sent → Receiver sees notification → Accept/Decline → If accepted, both see each other in "My Connections" with social links
-
----
-
-## Phase 6: Profile & Discovery
-
-### Public Profile Page
-- Full profile view: photo, bio, all skills/interests/looking for, social links (if connected)
-- Match score shown if viewing someone else's profile
-- "Connect" button if not yet connected
-
-### Member Directory
-- Searchable directory with filters by skills, interests, member type, and looking for
-- Card grid view with match scores
-
----
-
-## Phase 7: Admin Dashboard
-
-### Community Analytics (for Hub team)
-- Total members count by type (co-living, co-working, event, follower)
-- Connections made: total + weekly trend line chart
-- Top connectors leaderboard
-- "Lonely members" list: profiles with 0 connections to reach out to
-- Skills distribution visualization
-- Connection acceptance rate
-- Active users (weekly/monthly)
-
----
-
-## Key Design Details
-
-- **Mobile-first** responsive design throughout
-- **Concentric circle patterns** as decorative backgrounds on hero sections and empty states
-- **The Hub's brand colors** applied consistently: Deep Blue for primary actions, Orange for accents/tags, Teal for match badges
-- **Clean, minimal UI** — no clutter, generous whitespace
-- **Privacy**: profiles only visible to logged-in users
+- The `profiles.id` column directly uses `auth.users.id` (no separate foreign key column needed -- the PK itself is the FK)
+- Junction tables use `profile_id` referencing `profiles.id`
+- All junction table operations use upsert/delete patterns (clear and re-insert on save)
+- No admin roles needed at this stage
 
