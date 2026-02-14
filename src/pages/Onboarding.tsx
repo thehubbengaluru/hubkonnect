@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 import OnboardingStep1 from "@/components/onboarding/OnboardingStep1";
 import OnboardingStep2 from "@/components/onboarding/OnboardingStep2";
+import OnboardingStep3 from "@/components/onboarding/OnboardingStep3";
+import OnboardingStep4 from "@/components/onboarding/OnboardingStep4";
+import ProfileComplete from "@/components/onboarding/ProfileComplete";
 
 const TOTAL_STEPS = 4;
 
@@ -14,10 +17,14 @@ export interface OnboardingData {
   photoFile: File | null;
   photoPreview: string;
   memberTypes: string[];
+  skills: string[];
+  interests: string[];
+  lookingFor: string[];
 }
 
 const Onboarding = () => {
   const [step, setStep] = useState(1);
+  const [showComplete, setShowComplete] = useState(false);
   const [data, setData] = useState<OnboardingData>({
     fullName: "",
     bio: "",
@@ -26,6 +33,9 @@ const Onboarding = () => {
     photoFile: null,
     photoPreview: "",
     memberTypes: [],
+    skills: [],
+    interests: [],
+    lookingFor: [],
   });
   const navigate = useNavigate();
 
@@ -35,6 +45,19 @@ const Onboarding = () => {
   const updateData = (partial: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...partial }));
   };
+
+  const handleComplete = () => {
+    setShowComplete(true);
+  };
+
+  if (showComplete) {
+    return (
+      <ProfileComplete
+        matchCount={12}
+        onDone={() => navigate("/matches")}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,14 +93,20 @@ const Onboarding = () => {
           />
         )}
         {step === 3 && (
-          <div className="text-center font-mono text-muted-foreground border-2 border-foreground p-8 shadow-brutal">
-            Skills & Interests step — coming next phase
-          </div>
+          <OnboardingStep3
+            data={data}
+            updateData={updateData}
+            onNext={() => setStep(4)}
+            onBack={() => setStep(2)}
+          />
         )}
         {step === 4 && (
-          <div className="text-center font-mono text-muted-foreground border-2 border-foreground p-8 shadow-brutal">
-            Looking For step — coming next phase
-          </div>
+          <OnboardingStep4
+            data={data}
+            updateData={updateData}
+            onComplete={handleComplete}
+            onBack={() => setStep(3)}
+          />
         )}
       </div>
     </div>

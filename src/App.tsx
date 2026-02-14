@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
+import FirstMatches from "./pages/FirstMatches";
 import ForYou from "./pages/ForYou";
 import Connections from "./pages/Connections";
 import Profile from "./pages/Profile";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/matches" element={<FirstMatches />} />
           <Route path="/for-you" element={<ForYou />} />
           <Route path="/connections" element={<Connections />} />
           <Route path="/profile" element={<Profile />} />
