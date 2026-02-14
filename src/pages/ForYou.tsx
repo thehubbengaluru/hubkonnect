@@ -1,64 +1,53 @@
 import { useState } from "react";
-import { Search, ChevronDown, ArrowRight, Calendar, Palette } from "lucide-react";
+import { ChevronDown, Calendar, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import PageShell from "@/components/PageShell";
 import ProfileCard from "@/components/ProfileCard";
 import ConcentricCircles from "@/components/ConcentricCircles";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAllProfiles, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FILTER_PILLS = ["All", "Co-living", "Co-working", "Events", "Followers"];
-
-const MOCK_MATCHES = [
-  {
-    id: "1", name: "Arjun Mehta", handle: "@arjunbuilds",
-    bio: "Product designer passionate about fintech and user-first experiences.",
-    matchPercent: 92, skills: ["UI/UX Design", "Figma", "Startup"],
-    matchReason: "Shared: Photography • Both looking for collaborators", initials: "AM",
-  },
-  {
-    id: "2", name: "Priya Nair", handle: "@priyaframes",
-    bio: "Photographer capturing stories through documentary and street photography.",
-    matchPercent: 88, skills: ["Photography", "Travel", "Film"],
-    matchReason: "Shared: Photography, Travel", initials: "PN",
-  },
-  {
-    id: "3", name: "Karan Singh", handle: "@karanvibes",
-    bio: "Brand strategist helping early-stage startups find their voice.",
-    matchPercent: 85, skills: ["Marketing", "Strategy", "Branding"],
-    matchReason: "Looking for collaborators", initials: "KS",
-  },
-  {
-    id: "4", name: "Meera Joshi", handle: "@meeracodes",
-    bio: "Full-stack developer building tools for the creator economy.",
-    matchPercent: 82, skills: ["React", "Node.js", "AI/ML"],
-    matchReason: "Shared: Coding, Startups", initials: "MJ",
-  },
-  {
-    id: "5", name: "Rohan Das", handle: "@rohandas",
-    bio: "Content creator specializing in short-form video and motion graphics.",
-    matchPercent: 80, skills: ["Video Editing", "Motion Graphics"],
-    matchReason: "Both looking for feedback", initials: "RD",
-  },
-  {
-    id: "6", name: "Ananya Rao", handle: "@ananyawrites",
-    bio: "Copywriter and podcaster exploring stories at the intersection of tech and culture.",
-    matchPercent: 78, skills: ["Writing", "Podcasting", "Social Media"],
-    matchReason: "Shared: Writing, Social Impact", initials: "AR",
-  },
-];
-
-const ACTIVE_USERS = [
-  { name: "Arjun M.", initials: "AM" },
-  { name: "Priya N.", initials: "PN" },
-  { name: "Karan S.", initials: "KS" },
-  { name: "Meera J.", initials: "MJ" },
-  { name: "Sneha D.", initials: "SD" },
-];
+const FILTER_TO_TYPE: Record<string, string> = {
+  "Co-living": "co_living",
+  "Co-working": "co_working",
+  "Events": "event_attendee",
+  "Followers": "follower",
+};
 
 const ForYou = () => {
+  const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState("All");
   const [sortBy, setSortBy] = useState("best");
   const [visibleCount, setVisibleCount] = useState(6);
+
+  const { data: allProfiles, isLoading } = useAllProfiles(user?.id);
+  const { data: myProfile } = useMyProfileDetails(user?.id);
+
+  // Compute matches
+  const matchedProfiles = (allProfiles ?? []).map((p) => {
+    const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
+    return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
+  });
+
+  // Filter
+  const filtered = activeFilter === "All"
+    ? matchedProfiles
+    : matchedProfiles.filter((p) => p.member_types.includes(FILTER_TO_TYPE[activeFilter] ?? ""));
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "best") return b.matchPercent - a.matchPercent;
+    return 0;
+  });
+
+  const visible = sorted.slice(0, visibleCount);
+
+  const activeUsers = (allProfiles ?? []).slice(0, 5).map((p) => ({
+    name: p.full_name.split(" ").map((n, i) => i === 0 ? n : n[0] + ".").join(" "),
+    initials: p.full_name.split(" ").map((n) => n[0]).join("").toUpperCase(),
+  }));
 
   return (
     <PageShell>
@@ -105,14 +94,37 @@ const ForYou = () => {
               </div>
 
               {/* Profile cards */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {MOCK_MATCHES.slice(0, visibleCount).map((match) => (
-                  <ProfileCard key={match.id} {...match} />
-                ))}
-              </div>
+              {isLoading ? (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-64 border-2 border-foreground" />
+                  ))}
+                </div>
+              ) : visible.length === 0 ? (
+                <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal">
+                  No matches found yet. More people are joining every day!
+                </div>
+              ) : (
+                <div className="grid gap-6 md:grid-cols-2">
+                  {visible.map((match) => (
+                    <ProfileCard
+                      key={match.id}
+                      id={match.id}
+                      name={match.full_name}
+                      handle={match.instagram ? `@${match.instagram.replace("@", "")}` : ""}
+                      bio={match.bio}
+                      matchPercent={match.matchPercent}
+                      skills={match.skills}
+                      matchReason={match.matchReason}
+                      initials={match.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                      photoUrl={match.avatar_url || undefined}
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Load more */}
-              {visibleCount < MOCK_MATCHES.length && (
+              {visibleCount < sorted.length && (
                 <div className="mt-8">
                   <Button
                     variant="outline"
@@ -132,16 +144,20 @@ const ForYou = () => {
                 <h3 className="font-heading text-base uppercase mb-4">Your Community</h3>
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
-                    <p className="font-heading text-2xl">12</p>
+                    <p className="font-heading text-2xl">{(allProfiles ?? []).length}</p>
                     <p className="font-mono text-[10px] uppercase text-muted-foreground">Total Matches</p>
                   </div>
                   <div className="border-l-2 border-r-2 border-foreground">
-                    <p className="font-heading text-2xl">3</p>
+                    <p className="font-heading text-2xl">{Math.min((allProfiles ?? []).length, 3)}</p>
                     <p className="font-mono text-[10px] uppercase text-muted-foreground">This Week</p>
                   </div>
                   <div>
-                    <p className="font-heading text-2xl">85%</p>
-                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Match Rate</p>
+                    <p className="font-heading text-2xl">
+                      {matchedProfiles.length > 0
+                        ? Math.round(matchedProfiles.reduce((s, p) => s + p.matchPercent, 0) / matchedProfiles.length)
+                        : 0}%
+                    </p>
+                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Avg Match</p>
                   </div>
                 </div>
               </div>
@@ -150,7 +166,7 @@ const ForYou = () => {
               <div className="border-2 border-foreground bg-card p-5 shadow-brutal">
                 <h3 className="font-heading text-sm uppercase mb-3">Active Now</h3>
                 <div className="space-y-3">
-                  {ACTIVE_USERS.map((user) => (
+                  {activeUsers.map((user) => (
                     <div key={user.name} className="flex items-center gap-3 group cursor-pointer">
                       <div className="relative">
                         <div className="h-8 w-8 border-2 border-foreground bg-accent flex items-center justify-center">
@@ -164,9 +180,6 @@ const ForYou = () => {
                     </div>
                   ))}
                 </div>
-                <button className="mt-4 font-mono text-xs text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors">
-                  View All Members →
-                </button>
               </div>
 
               {/* Upcoming events */}
@@ -179,16 +192,7 @@ const ForYou = () => {
                     </p>
                     <p className="font-mono text-[11px] text-muted-foreground">Friday, 7 PM</p>
                   </div>
-                  <div className="border-l-[3px] border-accent bg-accent/10 px-3 py-2">
-                    <p className="font-mono text-sm font-bold flex items-center gap-1.5">
-                      <Palette className="h-3.5 w-3.5" /> Design Workshop
-                    </p>
-                    <p className="font-mono text-[11px] text-muted-foreground">Saturday, 3 PM</p>
-                  </div>
                 </div>
-                <button className="mt-4 font-mono text-xs text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors">
-                  See all events →
-                </button>
               </div>
             </aside>
           </div>
