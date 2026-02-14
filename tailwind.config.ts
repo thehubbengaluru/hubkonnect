@@ -14,9 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        heading: ["Inter", "system-ui", "sans-serif"],
-        accent: ["Space Grotesk", "system-ui", "sans-serif"],
+        mono: ["Space Mono", "monospace"],
+        heading: ["Dela Gothic One", "cursive"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -85,11 +84,11 @@ export default {
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-        card: "12px",
-        button: "8px",
-        avatar: "24px",
+        md: "var(--radius)",
+        sm: "var(--radius)",
+        card: "0px",
+        button: "0px",
+        avatar: "0px",
       },
       keyframes: {
         "accordion-down": {
@@ -100,21 +99,10 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "pulse-ring": {
-          "0%": { transform: "scale(0.8)", opacity: "0.5" },
-          "50%": { transform: "scale(1)", opacity: "0.2" },
-          "100%": { transform: "scale(1.2)", opacity: "0" },
-        },
-        "fade-in-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-ring": "pulse-ring 2s ease-out infinite",
-        "fade-in-up": "fade-in-up 0.6s ease-out forwards",
       },
     },
   },
