@@ -1,81 +1,37 @@
 import { useState } from "react";
-import { X, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import ProfileCard from "@/components/ProfileCard";
-
-const MOCK_MATCHES = [
-  {
-    id: "1",
-    name: "Arjun Mehta",
-    handle: "@arjunbuilds",
-    bio: "Product designer passionate about fintech and user-first experiences.",
-    matchPercent: 92,
-    skills: ["UI/UX Design", "Figma", "Startup"],
-    matchReason: "Shared: Photography • Both looking for collaborators",
-    initials: "AM",
-  },
-  {
-    id: "2",
-    name: "Priya Nair",
-    handle: "@priyaframes",
-    bio: "Photographer capturing stories through documentary and street photography.",
-    matchPercent: 88,
-    skills: ["Photography", "Travel", "Film"],
-    matchReason: "Shared: Photography, Travel",
-    initials: "PN",
-  },
-  {
-    id: "3",
-    name: "Karan Singh",
-    handle: "@karanvibes",
-    bio: "Brand strategist helping early-stage startups find their voice.",
-    matchPercent: 85,
-    skills: ["Marketing", "Strategy", "Branding"],
-    matchReason: "Looking for collaborators",
-    initials: "KS",
-  },
-  {
-    id: "4",
-    name: "Meera Joshi",
-    handle: "@meeracodes",
-    bio: "Full-stack developer building tools for the creator economy.",
-    matchPercent: 82,
-    skills: ["React", "Node.js", "AI/ML"],
-    matchReason: "Shared: Coding, Startups",
-    initials: "MJ",
-  },
-  {
-    id: "5",
-    name: "Rohan Das",
-    handle: "@rohandas",
-    bio: "Content creator specializing in short-form video and motion graphics.",
-    matchPercent: 80,
-    skills: ["Video Editing", "Motion Graphics"],
-    matchReason: "Both looking for feedback",
-    initials: "RD",
-  },
-  {
-    id: "6",
-    name: "Ananya Rao",
-    handle: "@ananyawrites",
-    bio: "Copywriter and podcaster exploring stories at the intersection of tech and culture.",
-    matchPercent: 78,
-    skills: ["Writing", "Podcasting", "Social Media"],
-    matchReason: "Shared: Writing, Social Impact",
-    initials: "AR",
-  },
-];
+import { useAuth } from "@/contexts/AuthContext";
+import { useAllProfiles, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FirstMatches = () => {
+  const { user } = useAuth();
   const [bannerVisible, setBannerVisible] = useState(true);
   const [sortBy, setSortBy] = useState("best");
   const [filterType, setFilterType] = useState("all");
 
+  const { data: allProfiles, isLoading } = useAllProfiles(user?.id);
+  const { data: myProfile } = useMyProfileDetails(user?.id);
+
+  const matchedProfiles = (allProfiles ?? []).map((p) => {
+    const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
+    return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
+  });
+
+  const filtered = filterType === "all"
+    ? matchedProfiles
+    : matchedProfiles.filter((p) => p.member_types.includes(filterType));
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "best") return b.matchPercent - a.matchPercent;
+    return 0;
+  });
+
   return (
     <PageShell>
       <div className="container py-8">
-        {/* Welcome banner */}
         {bannerVisible && (
           <div className="relative border-2 border-foreground bg-foreground text-primary-foreground p-6 md:p-8 mb-8 shadow-brutal">
             <button
@@ -88,12 +44,11 @@ const FirstMatches = () => {
               Welcome to Community Connector! 👋
             </h2>
             <p className="font-mono text-sm text-primary-foreground/70 max-w-xl">
-              Here are {MOCK_MATCHES.length} people we think you'll vibe with based on your skills, interests, and what you're looking for.
+              Here are {sorted.length} people we think you'll vibe with based on your skills, interests, and what you're looking for.
             </p>
           </div>
         )}
 
-        {/* Header + filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <h2 className="font-heading text-2xl md:text-3xl uppercase">Your Matches</h2>
           <div className="flex gap-2">
@@ -114,17 +69,39 @@ const FirstMatches = () => {
               <option value="all">All Types</option>
               <option value="co_living">Co-living</option>
               <option value="co_working">Co-working</option>
-              <option value="event">Event Attendees</option>
+              <option value="event_attendee">Event Attendees</option>
             </select>
           </div>
         </div>
 
-        {/* Profile cards grid */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {MOCK_MATCHES.map((match) => (
-            <ProfileCard key={match.id} {...match} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-64 border-2 border-foreground" />
+            ))}
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal">
+            No matches found yet. More people are joining every day!
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sorted.map((match) => (
+              <ProfileCard
+                key={match.id}
+                id={match.id}
+                name={match.full_name}
+                handle={match.instagram ? `@${match.instagram.replace("@", "")}` : ""}
+                bio={match.bio}
+                matchPercent={match.matchPercent}
+                skills={match.skills}
+                matchReason={match.matchReason}
+                initials={match.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()}
+                photoUrl={match.avatar_url || undefined}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </PageShell>
   );
