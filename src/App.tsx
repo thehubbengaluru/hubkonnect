@@ -11,6 +11,7 @@ import FirstMatches from "./pages/FirstMatches";
 import ForYou from "./pages/ForYou";
 import Connections from "./pages/Connections";
 import Profile from "./pages/Profile";
+import MyProfile from "./pages/MyProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
           <Route path="/matches" element={<FirstMatches />} />
           <Route path="/for-you" element={<ForYou />} />
           <Route path="/connections" element={<Connections />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={<MyProfile />} />
+          <Route path="/profile/:id" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
