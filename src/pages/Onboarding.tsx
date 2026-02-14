@@ -6,6 +6,9 @@ import OnboardingStep2 from "@/components/onboarding/OnboardingStep2";
 import OnboardingStep3 from "@/components/onboarding/OnboardingStep3";
 import OnboardingStep4 from "@/components/onboarding/OnboardingStep4";
 import ProfileComplete from "@/components/onboarding/ProfileComplete";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const TOTAL_STEPS = 4;
 
@@ -25,6 +28,11 @@ export interface OnboardingData {
 const Onboarding = () => {
   const [step, setStep] = useState(1);
   const [showComplete, setShowComplete] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { user, refreshProfile } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const [data, setData] = useState<OnboardingData>({
     fullName: "",
     bio: "",
@@ -37,7 +45,6 @@ const Onboarding = () => {
     interests: [],
     lookingFor: [],
   });
-  const navigate = useNavigate();
 
   const stepLabels = ["Basic Info", "Member Type", "Skills & Interests", "Looking For"];
   const progress = (step / TOTAL_STEPS) * 100;
@@ -46,15 +53,80 @@ const Onboarding = () => {
     setData((prev) => ({ ...prev, ...partial }));
   };
 
-  const handleComplete = () => {
-    setShowComplete(true);
+  const handleComplete = async () => {
+    if (!user || saving) return;
+    setSaving(true);
+
+    try {
+      // 1. Upload avatar if provided
+      let avatarUrl = "";
+      if (data.photoFile) {
+        const ext = data.photoFile.name.split(".").pop();
+        const path = `${user.id}/avatar.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("avatars")
+          .upload(path, data.photoFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+        avatarUrl = urlData.publicUrl;
+      }
+
+      // 2. Update profile (using any since generated types may lag)
+      const { error: profileErr } = await (supabase as any)
+        .from("profiles")
+        .update({
+          full_name: data.fullName,
+          bio: data.bio,
+          instagram: data.instagram,
+          linkedin: data.linkedin,
+          avatar_url: avatarUrl,
+          onboarding_completed: true,
+        })
+        .eq("id", user.id);
+      if (profileErr) throw profileErr;
+
+      // 3. Insert junction table data (clear first, then insert)
+      const deleteAndInsert = async (
+        table: string,
+        column: string,
+        values: string[]
+      ) => {
+        // Using type assertion since generated types may not include new tables yet
+        const client = supabase as any;
+        await client.from(table).delete().eq("profile_id", user.id);
+        if (values.length > 0) {
+          const rows = values.map((v: string) => ({ profile_id: user.id, [column]: v }));
+          const { error } = await client.from(table).insert(rows);
+          if (error) throw error;
+        }
+      };
+
+      await Promise.all([
+        deleteAndInsert("profile_member_types", "member_type", data.memberTypes),
+        deleteAndInsert("profile_skills", "skill", data.skills),
+        deleteAndInsert("profile_interests", "interest", data.interests),
+        deleteAndInsert("profile_looking_for", "looking_for", data.lookingFor),
+      ]);
+
+      await refreshProfile();
+      setShowComplete(true);
+    } catch (err: any) {
+      console.error("Onboarding save error:", err);
+      toast({
+        title: "Error saving profile",
+        description: err.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (showComplete) {
     return (
       <ProfileComplete
         matchCount={12}
-        onDone={() => navigate("/matches")}
+        onDone={() => navigate("/for-you")}
       />
     );
   }
