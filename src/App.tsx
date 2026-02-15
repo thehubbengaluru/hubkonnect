@@ -15,6 +15,7 @@ import Connections from "./pages/Connections";
 import Profile from "./pages/Profile";
 import MyProfile from "./pages/MyProfile";
 import NotFound from "./pages/NotFound";
+import Pitch from "./pages/Pitch";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/profile/:id" element={
               <ProtectedRoute><Profile /></ProtectedRoute>
             } />
+            <Route path="/pitch" element={<Pitch />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
