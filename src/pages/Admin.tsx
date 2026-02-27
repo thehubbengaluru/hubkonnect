@@ -1,11 +1,10 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminStats } from "@/hooks/use-admin-stats";
+import { useIsAdmin } from "@/hooks/use-admin-role";
 import { Navigate } from "react-router-dom";
 import PageShell from "@/components/PageShell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, TrendingUp, Users, MessageSquare, Link2, Activity } from "lucide-react";
-
-const ADMIN_EMAILS = ["admin@hubkonnect.com", "azaan@thehub.com"];
 
 const StatCard = ({ label, value, sub, icon: Icon, alert }: {
   label: string; value: string | number; sub?: string; icon?: any; alert?: boolean;
@@ -22,12 +21,12 @@ const StatCard = ({ label, value, sub, icon: Icon, alert }: {
 
 const Admin = () => {
   const { user, loading: authLoading } = useAuth();
-  const { data: stats, isLoading } = useAdminStats();
+  const { data: isAdmin, isLoading: roleLoading } = useIsAdmin(user?.id);
+  const { data: stats, isLoading } = useAdminStats(isAdmin === true);
 
-  if (authLoading) return null;
+  if (authLoading || roleLoading) return null;
 
-  const email = user?.email ?? "";
-  if (!ADMIN_EMAILS.includes(email)) {
+  if (!isAdmin) {
     return <Navigate to="/" replace />;
   }
 
