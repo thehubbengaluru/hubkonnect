@@ -1,14 +1,13 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, User, Users, Handshake, ChevronDown, Quote } from "lucide-react";
+import { ArrowRight, User, Users, Handshake, ChevronDown, Quote, Lock, Coffee, Repeat, Kanban, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import ConcentricCircles from "@/components/ConcentricCircles";
 import thbLogo from "@/assets/thb-logo.png";
+import { useBetaStats } from "@/hooks/use-beta-stats";
 
-const stats = [
-  { value: "500+", label: "Members", caption: "Creators, founders, freelancers, and operators at The Hub Bengaluru." },
-  { value: "120+", label: "New Connections", caption: "Collaborations, co-founding conversations, side projects, and paid gigs started through Community Connector." },
-  { value: "85%", label: "Match Rate", caption: "Members say their matches align with what they're looking for — from skill set to stage to ambition." },
-];
+const MEMBER_GOAL = 100;
 
 const steps = [
   {
@@ -49,7 +48,19 @@ const testimonials = [
   },
 ];
 
+const lockedFeatures = [
+  { icon: Coffee, title: "Coffee Roulette", description: "Weekly random pairings with conversation starters and auto-scheduled meetups." },
+  { icon: Repeat, title: "Skill Swaps", description: "Barter your skills directly — offer video editing, get copywriting in return." },
+  { icon: Kanban, title: "Project Boards", description: "Post projects, list roles needed, let people apply with one click." },
+  { icon: UsersRound, title: "Accountability Pods", description: "Join small groups with shared goals. Weekly check-ins for 6 weeks." },
+];
+
 const Index = () => {
+  const { data: stats } = useBetaStats();
+  const memberCount = stats?.totalMembers ?? 0;
+  const connectionCount = stats?.totalConnections ?? 0;
+  const progressPercent = Math.min(100, Math.round((memberCount / MEMBER_GOAL) * 100));
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navbar */}
@@ -69,7 +80,7 @@ const Index = () => {
             </Link>
             <Link to="/signup">
               <Button className="font-mono text-xs md:text-sm uppercase tracking-wider border-2 border-foreground shadow-brutal-sm hover:shadow-brutal transition-all gap-1">
-                Get Started <ArrowRight className="h-4 w-4" />
+                Join the Beta <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
@@ -81,6 +92,10 @@ const Index = () => {
         <ConcentricCircles className="absolute inset-0 w-full h-full text-foreground pointer-events-none" />
 
         <div className="relative z-10 text-center max-w-3xl mx-auto space-y-6 md:space-y-8">
+          <Badge className="bg-accent text-accent-foreground border-2 border-foreground font-mono text-xs uppercase tracking-wider px-4 py-1.5 shadow-brutal-sm">
+            🚀 Early Access Beta
+          </Badge>
+
           <img src={thbLogo} alt="The Hub Bengaluru logo" className="h-24 md:h-32 mx-auto mb-2" />
           <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-[72px] font-heading uppercase leading-[0.95]">
             Turn your community
@@ -105,9 +120,10 @@ const Index = () => {
           <div className="flex flex-col items-center gap-4 pt-4">
             <Link to="/signup">
               <Button size="lg" className="gap-2 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider px-8 md:px-10 h-14 text-sm md:text-base">
-                Get Started — It's Free <ArrowRight className="h-5 w-5" />
+                Join the Beta — It's Free <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
+            <span className="font-mono text-xs text-muted-foreground">Limited early access · No credit card required</span>
             <Link to="/login" className="font-mono text-sm text-muted-foreground hover:text-foreground underline decoration-accent decoration-2 underline-offset-4 transition-colors">
               Already a member? Log in
             </Link>
@@ -164,22 +180,68 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Community Stats */}
+      {/* Community Stats — Live Beta Progress */}
       <section className="py-16 md:py-20 px-4 bg-foreground text-primary-foreground border-t-2 border-foreground">
         <div className="container max-w-4xl">
-          <h2 className="text-2xl md:text-4xl font-heading uppercase text-center mb-12">
-            The Hub community is already matching
+          <h2 className="text-2xl md:text-4xl font-heading uppercase text-center mb-4">
+            Beta Goal: {MEMBER_GOAL} Members
           </h2>
+          <p className="font-mono text-sm text-primary-foreground/60 text-center mb-8">
+            Join the founding community. Early members shape what gets built next.
+          </p>
+
+          <div className="max-w-md mx-auto mb-10">
+            <div className="flex justify-between font-mono text-xs mb-2">
+              <span>{memberCount} members joined</span>
+              <span>{MEMBER_GOAL} goal</span>
+            </div>
+            <Progress value={progressPercent} className="h-4 border-2 border-primary-foreground/30 bg-primary-foreground/10" />
+            <p className="font-mono text-xs text-primary-foreground/50 text-center mt-2">
+              {progressPercent}% there — {MEMBER_GOAL - memberCount} spots to go
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-3 gap-8">
-            {stats.map((s) => (
-              <div key={s.label} className="text-center space-y-2">
-                <div className="text-3xl md:text-5xl font-heading">{s.value}</div>
-                <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">
-                  {s.label}
+            <div className="text-center space-y-2">
+              <div className="text-3xl md:text-5xl font-heading">{memberCount}</div>
+              <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">Members</div>
+              <p className="font-mono text-xs text-primary-foreground/50">Creators, founders, and operators</p>
+            </div>
+            <div className="text-center space-y-2">
+              <div className="text-3xl md:text-5xl font-heading">{connectionCount}</div>
+              <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">Connections Made</div>
+              <p className="font-mono text-xs text-primary-foreground/50">Real collaborations, not just follows</p>
+            </div>
+            <div className="text-center space-y-2">
+              <div className="text-3xl md:text-5xl font-heading">{stats?.avgMatchRate ?? 0}%</div>
+              <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">Avg Match Rate</div>
+              <p className="font-mono text-xs text-primary-foreground/50">Based on skills, interests & goals</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What Unlocks at 100 Members */}
+      <section className="py-20 md:py-28 px-4 border-t-2 border-foreground">
+        <div className="container max-w-5xl">
+          <h2 className="text-3xl md:text-4xl font-heading uppercase text-center mb-4">
+            What Unlocks at {MEMBER_GOAL} Members
+          </h2>
+          <p className="font-mono text-sm text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+            These features activate when we hit our founding member goal. Join now to shape them.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {lockedFeatures.map((f) => (
+              <div
+                key={f.title}
+                className="border-2 border-foreground/30 bg-card p-6 text-center opacity-80 hover:opacity-100 transition-opacity relative"
+              >
+                <Lock className="absolute top-3 right-3 h-4 w-4 text-muted-foreground" />
+                <div className="h-12 w-12 border-2 border-foreground/30 flex items-center justify-center mx-auto mb-4 bg-secondary">
+                  <f.icon className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <p className="font-mono text-xs text-primary-foreground/50 leading-relaxed mt-2">
-                  {s.caption}
-                </p>
+                <h3 className="font-heading text-lg uppercase mb-2">{f.title}</h3>
+                <p className="font-mono text-xs text-muted-foreground leading-relaxed">{f.description}</p>
               </div>
             ))}
           </div>
@@ -189,12 +251,11 @@ const Index = () => {
       {/* Success Stories */}
       <section className="py-20 md:py-28 px-4 bg-secondary border-t-2 border-foreground">
         <div className="container max-w-5xl">
-          <h2 className="text-3xl md:text-4xl font-heading uppercase text-center mb-4">
-            Real connections, real impact
+          <h2 className="text-3xl md:text-4xl font-heading uppercase text-center mb-2">
+            What Early Testers Are Saying
           </h2>
-          <p className="font-mono text-sm text-muted-foreground text-center mb-16 max-w-xl mx-auto leading-relaxed">
-            Tired of collecting business cards and LinkedIn connections that lead nowhere?
-            Here's how members are using Community Connector to find collaborators who actually move projects forward.
+          <p className="font-mono text-xs text-muted-foreground text-center mb-12">
+            <Badge variant="outline" className="font-mono text-[10px] uppercase">Beta testers</Badge>
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
@@ -228,16 +289,17 @@ const Index = () => {
             Your next collaborator is already at The Hub
           </h2>
           <p className="font-mono text-sm md:text-base text-primary-foreground/70 max-w-lg mx-auto leading-relaxed">
-            Join 500+ members using Community Connector to turn chance encounters at The Hub into real projects, products, and partnerships.
+            Join {memberCount > 0 ? `${memberCount}` : "the first"} members using Community Connector to turn chance encounters at The Hub into real projects, products, and partnerships.
           </p>
           <p className="font-mono text-sm text-primary-foreground/50">
             Get your first curated matches in under 5 minutes — it's free for Hub members.
           </p>
           <Link to="/signup">
             <Button size="lg" className="bg-accent text-accent-foreground border-2 border-accent shadow-brutal-accent hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all font-mono font-bold uppercase tracking-wider px-10 h-14 text-base mt-4">
-              Get Started — It's Free
+              Join the Beta — It's Free
             </Button>
           </Link>
+          <p className="font-mono text-xs text-primary-foreground/40">Limited early access</p>
         </div>
       </section>
 

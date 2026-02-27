@@ -19,6 +19,7 @@ import Profile from "./pages/Profile";
 import MyProfile from "./pages/MyProfile";
 import NotFound from "./pages/NotFound";
 import Pitch from "./pages/Pitch";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +62,9 @@ const App = () => (
               <ProtectedRoute><Profile /></ProtectedRoute>
             } />
             <Route path="/pitch" element={<Pitch />} />
+            <Route path="/admin" element={
+              <ProtectedRoute><Admin /></ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
           </ErrorBoundary>
