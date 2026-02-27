@@ -213,6 +213,7 @@ export type Database = {
           full_name: string
           id: string
           instagram: string | null
+          last_seen_at: string | null
           linkedin: string | null
           onboarding_completed: boolean | null
           privacy: string | null
@@ -225,6 +226,7 @@ export type Database = {
           full_name?: string
           id: string
           instagram?: string | null
+          last_seen_at?: string | null
           linkedin?: string | null
           onboarding_completed?: boolean | null
           privacy?: string | null
@@ -237,6 +239,7 @@ export type Database = {
           full_name?: string
           id?: string
           instagram?: string | null
+          last_seen_at?: string | null
           linkedin?: string | null
           onboarding_completed?: boolean | null
           privacy?: string | null

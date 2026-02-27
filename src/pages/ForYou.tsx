@@ -8,6 +8,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAllProfiles, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
 import { useMyConnectionsList } from "@/hooks/use-connections";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useActiveNow } from "@/hooks/use-active-now";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 
 const FILTER_PILLS = ["All", "Co-living", "Co-working", "Events", "Followers"];
 const FILTER_TO_TYPE: Record<string, string> = {
@@ -57,10 +60,7 @@ const ForYou = () => {
 
   const visible = sorted.slice(0, visibleCount);
 
-  const activeUsers = (allProfiles ?? []).slice(0, 5).map((p) => ({
-    name: p.full_name.split(" ").map((n, i) => i === 0 ? n : n[0] + ".").join(" "),
-    initials: p.full_name.split(" ").map((n) => n[0]).join("").toUpperCase(),
-  }));
+  const { data: activeNowUsers, isLoading: activeLoading } = useActiveNow();
 
   return (
     <PageShell>
@@ -179,21 +179,40 @@ const ForYou = () => {
               {/* Active now */}
               <div className="border-2 border-foreground bg-card p-5 shadow-brutal">
                 <h3 className="font-heading text-sm uppercase mb-3">Active Now</h3>
-                <div className="space-y-3">
-                  {activeUsers.map((user) => (
-                    <div key={user.name} className="flex items-center gap-3 group cursor-pointer">
-                      <div className="relative">
-                        <div className="h-8 w-8 border-2 border-foreground bg-accent flex items-center justify-center">
-                          <span className="font-mono text-[10px] font-bold">{user.initials}</span>
+                {activeLoading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => <Skeleton key={i} className="h-8 w-full" />)}
+                  </div>
+                ) : !activeNowUsers || activeNowUsers.length === 0 ? (
+                  <p className="font-mono text-xs text-muted-foreground">No one online right now. Check back later!</p>
+                ) : (
+                  <div className="space-y-3">
+                    {activeNowUsers.map((u) => (
+                      <Link key={u.id} to={`/profile/${u.id}`} className="flex items-center gap-3 group">
+                        <div className="relative">
+                          {u.avatar_url ? (
+                            <img src={u.avatar_url} alt={u.full_name} className="h-8 w-8 border-2 border-foreground object-cover" />
+                          ) : (
+                            <div className="h-8 w-8 border-2 border-foreground bg-accent flex items-center justify-center">
+                              <span className="font-mono text-[10px] font-bold">{u.initials}</span>
+                            </div>
+                          )}
+                          <div className={`absolute -top-0.5 -left-0.5 h-2.5 w-2.5 border border-background rounded-full ${
+                            u.status === "online" ? "bg-green-500" : "bg-amber-400"
+                          }`} />
                         </div>
-                        <div className="absolute -top-0.5 -left-0.5 h-2.5 w-2.5 bg-success border border-background rounded-full" />
-                      </div>
-                      <span className="font-mono text-sm group-hover:underline decoration-accent decoration-2 underline-offset-2">
-                        {user.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="font-mono text-sm group-hover:underline decoration-accent decoration-2 underline-offset-2 block truncate">
+                            {u.full_name}
+                          </span>
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {u.matchPercent}% match · {u.status === "online" ? "Online now" : formatDistanceToNow(new Date(u.lastSeenAt), { addSuffix: true })}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Upcoming events */}
