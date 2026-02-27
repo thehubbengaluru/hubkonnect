@@ -82,7 +82,7 @@ const Index = () => {
 
         <div className="relative z-10 text-center max-w-3xl mx-auto space-y-6 md:space-y-8">
           <img src={thbLogo} alt="The Hub Bengaluru logo" className="h-24 md:h-32 mx-auto mb-2" />
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[72px] font-heading uppercase leading-[0.95]">
+          <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-[72px] font-heading uppercase leading-[0.95]">
             Turn your community
             <br />
             into your{" "}
