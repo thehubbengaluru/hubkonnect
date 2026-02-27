@@ -111,7 +111,7 @@ const ForYou = () => {
                       key={match.id}
                       id={match.id}
                       name={match.full_name}
-                      handle={match.instagram ? `@${match.instagram.replace("@", "")}` : ""}
+                      handle=""
                       bio={match.bio}
                       matchPercent={match.matchPercent}
                       skills={match.skills}

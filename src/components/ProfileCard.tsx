@@ -31,9 +31,11 @@ const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason,
       toast({ title: "Request sent!", description: `Connection request sent to ${name}.` });
     } catch (err: any) {
       const msg = err?.message ?? "";
-      if (msg.includes("duplicate") || msg.includes("unique")) {
+      if (msg.includes("duplicate") || msg.includes("unique") || msg.includes("already exists")) {
         toast({ title: "Already sent", description: "You already have a pending request with this person." });
         setSent(true);
+      } else if (msg.includes("rate limit") || msg.includes("limit reached") || msg.includes("10/day")) {
+        toast({ title: "Daily limit reached", description: "You've reached your daily connection limit (10/day). Try again tomorrow.", variant: "destructive" });
       } else {
         toast({ title: "Error", description: msg || "Failed to send request.", variant: "destructive" });
       }

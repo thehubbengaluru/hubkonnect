@@ -207,7 +207,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_profile_visibility: { Args: { target_id: string }; Returns: string }
+      is_connected: {
+        Args: { user_a: string; user_b: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

@@ -117,3 +117,20 @@ export function useSendConnection() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["connections"] }),
   });
 }
+
+export function useConnectionStatus(userId: string | undefined, otherUserId: string | undefined) {
+  return useQuery({
+    queryKey: ["connection-status", userId, otherUserId],
+    queryFn: async () => {
+      if (!userId || !otherUserId) return null;
+      const { data } = await supabase
+        .from("connections")
+        .select("id, status, requester_id, receiver_id")
+        .or(`and(requester_id.eq.${userId},receiver_id.eq.${otherUserId}),and(requester_id.eq.${otherUserId},receiver_id.eq.${userId})`)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!userId && !!otherUserId,
+  });
+}
