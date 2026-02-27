@@ -1,12 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, UserCircle, Compass, Bell, Menu, X, LogOut } from "lucide-react";
+import { Users, UserCircle, Compass, MessageCircle, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 
 const navItems = [
   { to: "/for-you", label: "For You", icon: Compass },
   { to: "/connections", label: "Connections", icon: Users },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
   { to: "/profile", label: "Profile", icon: UserCircle },
 ];
 
@@ -49,15 +52,14 @@ const Navbar = () => {
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {user && profile?.avatar_url && (
               <div className="h-8 w-8 border-2 border-foreground overflow-hidden">
                 <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" />
               </div>
             )}
-            <Button variant="ghost" size="icon" className="relative border-2 border-transparent hover:border-foreground">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <ThemeToggle />
+            <NotificationBell />
             {user && (
               <Button
                 variant="ghost"
