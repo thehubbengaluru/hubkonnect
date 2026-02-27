@@ -65,7 +65,7 @@ const Connections = () => {
                 <div className="flex gap-4">
                   <div className="h-14 w-14 flex-shrink-0 border-2 border-foreground bg-accent flex items-center justify-center overflow-hidden">
                     {req.profile.avatar_url ? (
-                      <img src={req.profile.avatar_url} alt={req.profile.full_name} className="h-full w-full object-cover" />
+                      <img src={req.profile.avatar_url} alt={req.profile.full_name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <span className="font-heading text-sm">{getInitials(req.profile.full_name)}</span>
                     )}
@@ -118,7 +118,7 @@ const Connections = () => {
                 <div className="flex gap-4">
                   <div className="h-14 w-14 flex-shrink-0 border-2 border-foreground bg-accent flex items-center justify-center overflow-hidden">
                     {req.profile.avatar_url ? (
-                      <img src={req.profile.avatar_url} alt={req.profile.full_name} className="h-full w-full object-cover" />
+                      <img src={req.profile.avatar_url} alt={req.profile.full_name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
                       <span className="font-heading text-sm">{getInitials(req.profile.full_name)}</span>
                     )}
@@ -175,7 +175,7 @@ const Connections = () => {
                     className="border-2 border-foreground bg-card p-5 shadow-brutal hover:shadow-brutal-hover hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all text-center">
                     <div className="h-16 w-16 mx-auto border-2 border-foreground bg-accent flex items-center justify-center mb-3 overflow-hidden">
                       {conn.profile.avatar_url ? (
-                        <img src={conn.profile.avatar_url} alt={conn.profile.full_name} className="h-full w-full object-cover" />
+                        <img src={conn.profile.avatar_url} alt={conn.profile.full_name} className="h-full w-full object-cover" loading="lazy" />
                       ) : (
                         <span className="font-heading text-lg">{getInitials(conn.profile.full_name)}</span>
                       )}

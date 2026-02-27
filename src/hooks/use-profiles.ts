@@ -51,6 +51,7 @@ export function useProfileById(profileId: string | undefined) {
     queryKey: ["profile", profileId],
     queryFn: () => fetchProfileWithDetails(profileId!),
     enabled: !!profileId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -107,6 +108,7 @@ export function useAllProfiles(excludeUserId?: string) {
         }));
     },
     enabled: true,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -115,6 +117,7 @@ export function useMyProfileDetails(userId: string | undefined) {
     queryKey: ["my-profile-details", userId],
     queryFn: () => fetchProfileWithDetails(userId!),
     enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

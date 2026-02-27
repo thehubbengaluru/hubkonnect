@@ -52,7 +52,7 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             {user && profile?.avatar_url && (
               <div className="h-8 w-8 border-2 border-foreground overflow-hidden">
-                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" />
               </div>
             )}
             <Button variant="ghost" size="icon" className="relative border-2 border-transparent hover:border-foreground">

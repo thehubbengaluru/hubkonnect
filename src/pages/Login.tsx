@@ -107,7 +107,25 @@ const Login = () => {
                 />
                 <label htmlFor="remember" className="font-mono text-xs cursor-pointer">Remember me</label>
               </div>
-              <button type="button" className="font-mono text-xs text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) {
+                    setError("Enter your email first, then click Forgot password.");
+                    return;
+                  }
+                  try {
+                    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, {
+                      redirectTo: `${window.location.origin}/login`,
+                    });
+                    if (resetErr) throw resetErr;
+                    toast({ title: "Check your inbox", description: "A password reset link has been sent to your email." });
+                  } catch {
+                    toast({ title: "Error", description: "Could not send reset email. Please try again.", variant: "destructive" });
+                  }
+                }}
+                className="font-mono text-xs text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors"
+              >
                 Forgot password?
               </button>
             </div>

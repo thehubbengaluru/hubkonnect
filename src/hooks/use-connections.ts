@@ -58,6 +58,7 @@ export function useConnections(userId: string | undefined) {
       };
     },
     enabled: !!userId,
+    staleTime: 60 * 1000,
   });
 }
 
@@ -132,5 +133,23 @@ export function useConnectionStatus(userId: string | undefined, otherUserId: str
       return data;
     },
     enabled: !!userId && !!otherUserId,
+    staleTime: 60 * 1000,
+  });
+}
+
+/** Fetch all connection rows for a user (lightweight, for status lookups) */
+export function useMyConnectionsList(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["my-connections-list", userId],
+    queryFn: async () => {
+      if (!userId) return [];
+      const { data } = await supabase
+        .from("connections")
+        .select("id, requester_id, receiver_id, status")
+        .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+      return data ?? [];
+    },
+    enabled: !!userId,
+    staleTime: 60 * 1000,
   });
 }
