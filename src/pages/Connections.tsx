@@ -183,7 +183,8 @@ const Connections = () => {
                     <h3 className="font-heading text-sm uppercase">{conn.profile.full_name}</h3>
                     <p className="font-mono text-[10px] text-muted-foreground mt-2">Connected {timeAgo(conn.updated_at)}</p>
                     <div className="mt-3 space-y-1.5">
-                      <Button size="sm" className="w-full h-8 border-2 border-foreground font-mono text-[10px] uppercase tracking-wider shadow-brutal-sm gap-1">
+                      <Button size="sm" onClick={() => navigate(`/messages?chat=${conn.profile.id}`)}
+                        className="w-full h-8 border-2 border-foreground font-mono text-[10px] uppercase tracking-wider shadow-brutal-sm gap-1">
                         <MessageCircle className="h-3 w-3" /> Message
                       </Button>
                       <button onClick={() => navigate(`/profile/${conn.profile.id}`)}

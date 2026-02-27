@@ -9,10 +9,12 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import FirstMatches from "./pages/FirstMatches";
 import ForYou from "./pages/ForYou";
 import Connections from "./pages/Connections";
+import Messages from "./pages/Messages";
 import Profile from "./pages/Profile";
 import MyProfile from "./pages/MyProfile";
 import NotFound from "./pages/NotFound";
@@ -32,6 +34,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={
               <ProtectedRoute requireOnboarding={false}>
                 <Onboarding />
@@ -47,6 +50,9 @@ const App = () => (
             } />
             <Route path="/connections" element={
               <ProtectedRoute><Connections /></ProtectedRoute>
+            } />
+            <Route path="/messages" element={
+              <ProtectedRoute><Messages /></ProtectedRoute>
             } />
             <Route path="/profile" element={
               <ProtectedRoute><MyProfile /></ProtectedRoute>
