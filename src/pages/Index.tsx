@@ -5,44 +5,44 @@ import ConcentricCircles from "@/components/ConcentricCircles";
 import thbLogo from "@/assets/thb-logo.png";
 
 const stats = [
-  { value: "500+", label: "Members" },
-  { value: "120+", label: "Connections" },
-  { value: "85%", label: "Match Rate" },
+  { value: "500+", label: "Members", caption: "Creators, founders, freelancers, and operators at The Hub Bengaluru." },
+  { value: "120+", label: "New Connections", caption: "Collaborations, co-founding conversations, side projects, and paid gigs started through Community Connector." },
+  { value: "85%", label: "Match Rate", caption: "Members say their matches align with what they're looking for — from skill set to stage to ambition." },
 ];
 
 const steps = [
   {
     icon: User,
-    title: "Create Profile",
-    description: "Share your skills, interests, and what you're looking for in under 2 minutes.",
+    title: "Create Your Profile",
+    description: "Share your skills, interests, and what you're looking for in under 2 minutes — from co-founders and collaborators to clients and creative partners.",
   },
   {
     icon: Users,
-    title: "Get Matched",
-    description: "Our algorithm finds people with shared goals and complementary skills.",
+    title: "Get Curated Matches",
+    description: "Get a short list of members who share your goals and complement your skills, based on what you say you want — no awkward cold outreach, no endless scrolling.",
   },
   {
     icon: Handshake,
-    title: "Connect",
-    description: "Send requests and start collaborating on projects that matter.",
+    title: "Connect & Start Building",
+    description: "Send a message, set up a chat at The Hub, and start collaborating on projects that matter to you.",
   },
 ];
 
 const testimonials = [
   {
-    quote: "I met my video co-producer through Community Connector. We've already shipped 3 projects together. Game changer.",
+    quote: "I met my video co-producer through Community Connector. We've already shipped 3 projects together. Total game changer for my documentary work.",
     name: "Riya Sharma",
     role: "Documentary Filmmaker",
     initials: "RS",
   },
   {
-    quote: "Found a UI designer for my startup within a week. The matching is scarily accurate — saved me months of searching.",
+    quote: "Found a UI designer for my startup within a week. The matching is scarily accurate — saved me months of searching and random outreach.",
     name: "Arjun Mehta",
     role: "Startup Founder",
     initials: "AM",
   },
   {
-    quote: "As someone new to Bengaluru, this platform helped me find my tribe at The Hub. Now I have 8 genuine connections.",
+    quote: "As someone new to Bengaluru, this platform helped me find my tribe at The Hub. Now I have 8 genuine connections I actually collaborate with.",
     name: "Priya Nair",
     role: "Marketing Manager",
     initials: "PN",
@@ -59,7 +59,7 @@ const Index = () => {
             <span className="font-heading text-base md:text-lg uppercase leading-tight">
               Community Connector
             </span>
-            <span className="font-mono text-[10px] md:text-xs text-muted-foreground">by The Hub</span>
+            <span className="font-mono text-[10px] md:text-xs text-muted-foreground">by The Hub Bengaluru</span>
           </Link>
           <div className="flex items-center gap-2 md:gap-3">
             <Link to="/login">
@@ -92,10 +92,14 @@ const Index = () => {
             </span>
           </h1>
 
-          <p className="font-mono text-base md:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Connect with creators, builders, and dreamers at The Hub.
-            <br className="hidden sm:block" />
-            Find your next project partner in under 5 minutes.
+          <p className="font-mono text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Stop leaving connections to chance. Turn the people around you at The Hub into project partners who actually ship with you.
+          </p>
+
+          <p className="font-mono text-base md:text-lg text-foreground max-w-lg mx-auto leading-relaxed">
+            Connect with creators, founders, and operators at The Hub Bengaluru.
+            <br />
+            See curated matches for your next project partner in under 5 minutes.
           </p>
 
           <div className="flex flex-col items-center gap-4 pt-4">
@@ -116,14 +120,30 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Emotional bridge */}
+      <section className="py-16 md:py-20 px-4 border-t-2 border-foreground bg-secondary">
+        <div className="container max-w-3xl text-center space-y-4">
+          <h2 className="text-3xl md:text-4xl font-heading uppercase">
+            Stop networking by accident
+          </h2>
+          <p className="font-mono text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            You did not join The Hub for random coffee chats that go nowhere.
+            You joined to find people who get your ideas, share your ambition, and want to build with you.
+          </p>
+          <p className="font-mono text-sm md:text-base text-foreground font-bold max-w-lg mx-auto">
+            Community Connector helps you connect with purpose — in minutes, not months.
+          </p>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-20 md:py-28 px-4 border-t-2 border-foreground">
         <div className="container max-w-5xl">
           <h2 className="text-3xl md:text-4xl font-heading uppercase text-center mb-4">
-            Stop networking by accident
+            How It Works
           </h2>
           <p className="font-mono text-sm md:text-base text-muted-foreground text-center mb-16 max-w-lg mx-auto">
-            Start connecting with purpose.
+            From profile to project partner in three steps.
           </p>
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {steps.map((s, i) => (
@@ -148,15 +168,18 @@ const Index = () => {
       <section className="py-16 md:py-20 px-4 bg-foreground text-primary-foreground border-t-2 border-foreground">
         <div className="container max-w-4xl">
           <h2 className="text-2xl md:text-4xl font-heading uppercase text-center mb-12">
-            The Hub community is already connecting
+            The Hub community is already matching
           </h2>
-          <div className="grid grid-cols-3 gap-4 md:gap-8">
+          <div className="grid md:grid-cols-3 gap-8">
             {stats.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-3xl md:text-5xl font-heading mb-2">{s.value}</div>
+              <div key={s.label} className="text-center space-y-2">
+                <div className="text-3xl md:text-5xl font-heading">{s.value}</div>
                 <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">
                   {s.label}
                 </div>
+                <p className="font-mono text-xs text-primary-foreground/50 leading-relaxed mt-2">
+                  {s.caption}
+                </p>
               </div>
             ))}
           </div>
@@ -169,8 +192,9 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-heading uppercase text-center mb-4">
             Real connections, real impact
           </h2>
-          <p className="font-mono text-sm text-muted-foreground text-center mb-16">
-            Hear from people who found their collaborators at The Hub.
+          <p className="font-mono text-sm text-muted-foreground text-center mb-16 max-w-xl mx-auto leading-relaxed">
+            Tired of collecting business cards and LinkedIn connections that lead nowhere?
+            Here's how members are using Community Connector to find collaborators who actually move projects forward.
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
@@ -203,8 +227,11 @@ const Index = () => {
           <h2 className="text-3xl md:text-4xl font-heading uppercase">
             Your next collaborator is already at The Hub
           </h2>
-          <p className="font-mono text-sm md:text-base text-primary-foreground/70 max-w-md mx-auto">
-            Join 500+ creators who've found their people.
+          <p className="font-mono text-sm md:text-base text-primary-foreground/70 max-w-lg mx-auto leading-relaxed">
+            Join 500+ members using Community Connector to turn chance encounters at The Hub into real projects, products, and partnerships.
+          </p>
+          <p className="font-mono text-sm text-primary-foreground/50">
+            Get your first curated matches in under 5 minutes — it's free for Hub members.
           </p>
           <Link to="/signup">
             <Button size="lg" className="bg-accent text-accent-foreground border-2 border-accent shadow-brutal-accent hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all font-mono font-bold uppercase tracking-wider px-10 h-14 text-base mt-4">
