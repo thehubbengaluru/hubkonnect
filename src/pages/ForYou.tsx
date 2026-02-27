@@ -6,6 +6,7 @@ import ProfileCard from "@/components/ProfileCard";
 import ConcentricCircles from "@/components/ConcentricCircles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAllProfiles, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
+import { useMyConnectionsList } from "@/hooks/use-connections";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FILTER_PILLS = ["All", "Co-living", "Co-working", "Events", "Followers"];
@@ -24,6 +25,18 @@ const ForYou = () => {
 
   const { data: allProfiles, isLoading } = useAllProfiles(user?.id);
   const { data: myProfile } = useMyProfileDetails(user?.id);
+  const { data: myConnections } = useMyConnectionsList(user?.id);
+
+  const getConnectionStatus = (profileId: string): "none" | "sent" | "pending" | "connected" => {
+    const conn = (myConnections ?? []).find(
+      (c) => (c.requester_id === profileId || c.receiver_id === profileId)
+    );
+    if (!conn) return "none";
+    if (conn.status === "accepted") return "connected";
+    if (conn.status === "pending" && conn.requester_id === user?.id) return "sent";
+    if (conn.status === "pending" && conn.receiver_id === user?.id) return "pending";
+    return "none";
+  };
 
   // Compute matches
   const matchedProfiles = (allProfiles ?? []).map((p) => {
@@ -118,6 +131,7 @@ const ForYou = () => {
                       matchReason={match.matchReason}
                       initials={match.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()}
                       photoUrl={match.avatar_url || undefined}
+                      connectionStatus={getConnectionStatus(match.id)}
                     />
                   ))}
                 </div>

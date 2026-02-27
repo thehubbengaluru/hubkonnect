@@ -89,7 +89,7 @@ const Profile = () => {
           <div className="flex justify-center mb-6">
             <div className="h-32 w-32 border-4 border-foreground bg-accent flex items-center justify-center shadow-brutal-lg overflow-hidden">
               {profile.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.full_name} className="h-full w-full object-cover" />
+                <img src={profile.avatar_url} alt={profile.full_name} className="h-full w-full object-cover" loading="lazy" />
               ) : (
                 <span className="font-heading text-4xl">{initials}</span>
               )}

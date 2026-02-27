@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { ArrowRight, Sparkles, Check } from "lucide-react";
+import { ArrowRight, Sparkles, Check, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useSendConnection } from "@/hooks/use-connections";
 import { useToast } from "@/hooks/use-toast";
+
+type ConnectionState = "none" | "sent" | "pending" | "connected";
 
 interface ProfileCardProps {
   id?: string;
@@ -15,25 +17,27 @@ interface ProfileCardProps {
   matchReason: string;
   initials: string;
   photoUrl?: string;
+  connectionStatus?: ConnectionState;
 }
 
-const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason, initials, photoUrl }: ProfileCardProps) => {
+const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason, initials, photoUrl, connectionStatus = "none" }: ProfileCardProps) => {
   const navigate = useNavigate();
   const sendConnection = useSendConnection();
   const { toast } = useToast();
-  const [sent, setSent] = useState(false);
+  const [localSent, setLocalSent] = useState(false);
+  const effectiveStatus: ConnectionState = localSent ? "sent" : connectionStatus;
 
   const handleConnect = async () => {
-    if (!id || sent) return;
+    if (!id || effectiveStatus !== "none") return;
     try {
       await sendConnection.mutateAsync({ receiverId: id });
-      setSent(true);
+      setLocalSent(true);
       toast({ title: "Request sent!", description: `Connection request sent to ${name}.` });
     } catch (err: any) {
       const msg = err?.message ?? "";
       if (msg.includes("duplicate") || msg.includes("unique") || msg.includes("already exists")) {
         toast({ title: "Already sent", description: "You already have a pending request with this person." });
-        setSent(true);
+        setLocalSent(true);
       } else if (msg.includes("rate limit") || msg.includes("limit reached") || msg.includes("10/day")) {
         toast({ title: "Daily limit reached", description: "You've reached your daily connection limit (10/day). Try again tomorrow.", variant: "destructive" });
       } else {
@@ -48,7 +52,7 @@ const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason,
         <div className="flex items-start justify-between">
           <div className="h-16 w-16 border-2 border-foreground bg-accent flex items-center justify-center overflow-hidden">
             {photoUrl ? (
-              <img src={photoUrl} alt={name} className="h-full w-full object-cover" />
+              <img src={photoUrl} alt={name} className="h-full w-full object-cover" loading="lazy" />
             ) : (
               <span className="font-heading text-lg">{initials}</span>
             )}
@@ -85,10 +89,13 @@ const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason,
       <div className="border-t-2 border-foreground p-4 space-y-2">
         <Button
           onClick={handleConnect}
-          disabled={sent || sendConnection.isPending}
+          disabled={effectiveStatus !== "none" || sendConnection.isPending}
           className="w-full h-11 border-2 border-foreground shadow-brutal-sm hover:shadow-brutal transition-all font-mono font-bold uppercase tracking-wider text-xs gap-1"
         >
-          {sent ? <><Check className="h-3.5 w-3.5" /> Sent</> : sendConnection.isPending ? "Sending..." : <>Connect <ArrowRight className="h-3.5 w-3.5" /></>}
+          {effectiveStatus === "connected" ? <><Check className="h-3.5 w-3.5" /> Connected</> :
+           effectiveStatus === "sent" ? <><Check className="h-3.5 w-3.5" /> Sent</> :
+           effectiveStatus === "pending" ? <><Clock className="h-3.5 w-3.5" /> Pending</> :
+           sendConnection.isPending ? "Sending..." : <>Connect <ArrowRight className="h-3.5 w-3.5" /></>}
         </Button>
         <button onClick={() => id && navigate(`/profile/${id}`)}
           className="w-full text-center font-mono text-xs text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors py-1">
