@@ -8,7 +8,7 @@ import PageShell from "@/components/PageShell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfileById, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSendConnection } from "@/hooks/use-connections";
+import { useSendConnection, useConnectionStatus } from "@/hooks/use-connections";
 import { useToast } from "@/hooks/use-toast";
 import { LOOKING_FOR_OPTIONS } from "@/lib/onboarding-data";
 
@@ -24,6 +24,7 @@ const Profile = () => {
   const { data: profile, isLoading } = useProfileById(id);
   const { data: myProfile } = useMyProfileDetails(user?.id);
   const sendConn = useSendConnection();
+  const { data: connStatus } = useConnectionStatus(user?.id, id);
 
   if (isLoading) {
     return (
@@ -56,9 +57,21 @@ const Profile = () => {
       await sendConn.mutateAsync({ receiverId: profile.id });
       toast({ title: "Connection request sent!" });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      const msg = err?.message ?? "";
+      if (msg.includes("rate limit") || msg.includes("limit reached") || msg.includes("10/day")) {
+        toast({ title: "Daily limit reached", description: "You've reached your daily connection limit (10/day). Try again tomorrow.", variant: "destructive" });
+      } else if (msg.includes("duplicate") || msg.includes("unique") || msg.includes("already exists")) {
+        toast({ title: "Already sent", description: "A connection request already exists." });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
     }
   };
+
+  const isOwner = user?.id === profile.id;
+  const isConnected = connStatus?.status === "accepted";
+  const hasPending = connStatus?.status === "pending";
+  const showSocialLinks = isOwner || isConnected;
 
   return (
     <PageShell>
@@ -85,7 +98,7 @@ const Profile = () => {
 
           <div className="text-center space-y-2 mb-6">
             <h1 className="font-heading text-3xl md:text-4xl uppercase">{profile.full_name}</h1>
-            {profile.instagram && <p className="font-mono text-sm text-muted-foreground">@{profile.instagram.replace("@", "")}</p>}
+            {showSocialLinks && profile.instagram && <p className="font-mono text-sm text-muted-foreground">@{profile.instagram.replace("@", "")}</p>}
             {match && (
               <div className="inline-flex items-center border-2 border-foreground bg-foreground text-primary-foreground font-mono text-xs font-bold px-3 py-1 shadow-brutal-sm">
                 {match.percent}% Match
@@ -154,7 +167,7 @@ const Profile = () => {
             </div>
           )}
 
-          {(profile.instagram || profile.linkedin) && (
+          {showSocialLinks && (profile.instagram || profile.linkedin) && (
             <div className="border-2 border-foreground bg-card p-5 shadow-brutal mb-6">
               <h3 className="font-heading text-sm uppercase mb-3">Social Links</h3>
               <div className="flex gap-3">
@@ -175,13 +188,23 @@ const Profile = () => {
           )}
         </div>
 
-        {user?.id !== profile.id && (
+        {!isOwner && (
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-foreground p-4 md:pb-4 pb-20">
             <div className="container max-w-3xl flex gap-3">
-              <Button onClick={handleConnect} disabled={sendConn.isPending}
-                className="flex-1 h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2">
-                Send Connection Request <ArrowRight className="h-4 w-4" />
-              </Button>
+              {isConnected ? (
+                <Button disabled className="flex-1 h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-sm gap-2">
+                  Connected ✓
+                </Button>
+              ) : hasPending ? (
+                <Button disabled className="flex-1 h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-sm gap-2">
+                  Request Pending
+                </Button>
+              ) : (
+                <Button onClick={handleConnect} disabled={sendConn.isPending}
+                  className="flex-1 h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2">
+                  Send Connection Request <ArrowRight className="h-4 w-4" />
+                </Button>
+              )}
               <Button variant="outline" onClick={() => navigate(-1)}
                 className="flex-1 h-14 border-2 border-foreground font-mono text-sm uppercase tracking-wider hover:bg-card">
                 Maybe Later
