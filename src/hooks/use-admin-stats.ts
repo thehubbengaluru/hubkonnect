@@ -31,9 +31,10 @@ export interface AdminStats {
   topMessagers: { name: string; count: number }[];
 }
 
-export function useAdminStats() {
+export function useAdminStats(enabled: boolean = true) {
   return useQuery({
     queryKey: ["admin-stats"],
+    enabled,
     queryFn: async (): Promise<AdminStats> => {
       const now = new Date();
       const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
