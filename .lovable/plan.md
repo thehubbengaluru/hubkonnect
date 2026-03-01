@@ -1,73 +1,55 @@
 
 
-# Plan: Add 3 Pre-Launch Features
+## Improve Onboarding: More Intuitive and Interactive
 
-## Feature 1: "Who's Active Now" Sidebar (Real-time presence)
-
-**What changes:**
-- **Database migration**: Add `last_seen_at` (timestamptz, default `now()`) column to `profiles` table. Update the RLS policy so users can update their own `last_seen_at`.
-- **AuthContext / PageShell**: On every authenticated page load, upsert `last_seen_at = now()` for the current user via a lightweight hook (`usePresenceHeartbeat`). This fires once on mount and then every 5 minutes via `setInterval`.
-- **New hook `useActiveNow`**: Query profiles where `last_seen_at > now() - interval '15 minutes'`, exclude current user, join with match data. Returns top 5 sorted by match score.
-- **ForYou sidebar update**: Replace the current static "Active Now" section with real data from `useActiveNow`. Each entry shows avatar/initials, name, match %, time ago, and a "View Profile" link. Green dot only shows for users active in last 5 minutes; amber dot for 5-15 minutes.
-
-## Feature 2: Honest Beta Landing Page
-
-**What changes to `Index.tsx`:**
-- **Hero**: Add "Early Access Beta" badge above the main heading. Keep the existing headline and subtext.
-- **Stats section**: Replace hardcoded "500+" / "120+" / "85%" with a live query counting actual profiles, connections, and average match rate from the database. Show a progress bar toward the "100 members" goal. Use a new hook `useBetaStats` that runs 3 simple count queries.
-- **Testimonials section**: Replace with "What Early Testers Are Saying" header. Keep the 3 testimonial cards but add a subtle "Beta testers" label. This is an honest framing -- when you have real quotes, swap them in.
-- **New "What Unlocks at 100 Members" section**: A simple card grid showing locked features (Coffee Roulette, Skill Swaps, Project Boards, Accountability Pods) with lock icons and brief descriptions. Creates FOMO.
-- **CTA buttons**: Change "Get Started" to "Join the Beta -- It's Free" with a "Limited early access" sublabel.
-
-## Feature 3: Basic Analytics Admin Dashboard
-
-**What changes:**
-- **New page `src/pages/Admin.tsx`**: A protected route at `/admin` that checks if the user's email is in a hardcoded admin list (you can update this later).
-- **New route** in `App.tsx`: Add `/admin` wrapped in `ProtectedRoute`.
-- **Dashboard content** (all read-only queries via the existing database client):
-  1. **Activation funnel**: Total signups (profiles count), onboarding completed count, users with 1+ connections, users with 1+ messages sent.
-  2. **Engagement**: Daily active users (last_seen_at within 24h), weekly active (7 days), avg connections per user, avg messages per user.
-  3. **Connection funnel**: Total requests sent, accepted rate, users with 0 connections (red flag list), users with 5+ connections (power users).
-  4. **Retention**: Users active today vs 7 days ago vs 30 days ago (using `last_seen_at`).
-  5. **Top members**: Most connected, most messages sent.
-- **UI**: Uses the existing brutalist design system. Simple stat cards in a grid with recharts sparklines for trends. No external analytics SDK needed -- everything queries the existing tables.
-- **No nav link**: Admin page is accessed by direct URL only, not shown in the navbar.
+The current onboarding is functional but static -- plain forms, no animations, and no feedback as users progress. Here's a plan to make it feel polished and engaging while keeping the neo-brutalist design language.
 
 ---
 
-## Technical Details
+### 1. Animated Step Transitions
 
-### Database Migration (single migration)
+Replace the instant step swap with a smooth slide/fade transition between steps. Each step slides in from the right when advancing and from the left when going back, giving a clear sense of direction.
 
-```sql
--- Add last_seen_at to profiles for presence tracking
-ALTER TABLE public.profiles 
-  ADD COLUMN IF NOT EXISTS last_seen_at timestamptz DEFAULT now();
+### 2. Interactive Progress Stepper
 
--- Index for active-now queries
-CREATE INDEX IF NOT EXISTS idx_profiles_last_seen_at 
-  ON public.profiles (last_seen_at DESC);
-```
+Replace the plain progress bar with a **clickable step indicator** showing all 4 steps as labeled nodes (dots or squares in the brutalist style). Completed steps get a checkmark, the current step pulses with the accent color, and users can click back to completed steps to edit.
 
-### New Files
-| File | Purpose |
-|------|---------|
-| `src/hooks/use-presence.ts` | `usePresenceHeartbeat()` - updates `last_seen_at` on mount + interval |
-| `src/hooks/use-active-now.ts` | `useActiveNow()` - fetches recently active profiles with match scores |
-| `src/hooks/use-beta-stats.ts` | `useBetaStats()` - counts members, connections, avg match for landing page |
-| `src/hooks/use-admin-stats.ts` | `useAdminStats()` - all analytics queries for admin dashboard |
-| `src/pages/Admin.tsx` | Admin analytics dashboard |
+### 3. Live Profile Preview Card (Step 1)
 
-### Modified Files
-| File | Change |
-|------|--------|
-| `src/pages/ForYou.tsx` | Replace static activeUsers with `useActiveNow` hook; add heartbeat |
-| `src/pages/Index.tsx` | Beta badge, live stats, unlock roadmap section, updated CTAs |
-| `src/App.tsx` | Add `/admin` route |
-| `src/components/PageShell.tsx` | Add `usePresenceHeartbeat()` call so every page updates presence |
+As users fill in their name, bio, and photo on Step 1, show a **mini live-preview card** on the side (or below on mobile) that mirrors exactly how their profile will look to others. This gives instant visual feedback and motivates completion.
 
-### Estimated Scope
-- 1 database migration
-- 5 new files
-- 4 modified files
+### 4. Micro-interactions and Feedback
 
+- **Pill/card selection**: Add a satisfying scale bounce animation when selecting skills, interests, and member types (instead of just a color change).
+- **Counter animations**: Animate the selected count numbers (e.g., "3/5") with a brief pop when they change.
+- **Bio character counter**: Add a color-gradient progress ring around the character count that fills as the user types.
+
+### 5. Encouraging Completion Nudges
+
+- Show a small motivational line below the progress bar that changes per step: "Great start!", "Almost there!", "One more step!", "Let's go!"
+- On Step 3 (Skills & Interests), show a subtle message like "People with 5 skills get 3x more connections" to encourage full selection.
+
+### 6. Confetti on Profile Complete
+
+Enhance the `ProfileComplete` screen with a brief confetti burst animation (CSS-only, no library needed) before transitioning to the feed, making the completion feel celebratory.
+
+---
+
+### Technical Details
+
+**Files to create:**
+- `src/components/onboarding/StepTransition.tsx` -- wrapper component using CSS transitions for slide/fade between steps
+- `src/components/onboarding/StepIndicator.tsx` -- clickable 4-step progress indicator replacing the plain progress bar
+
+**Files to modify:**
+- `src/pages/Onboarding.tsx` -- integrate StepTransition wrapper, StepIndicator, and motivational nudge text
+- `src/components/onboarding/OnboardingStep1.tsx` -- add live profile preview card below the form fields
+- `src/components/onboarding/OnboardingStep3.tsx` -- add bounce animation on pill selection, animated counter
+- `src/components/onboarding/ProfileComplete.tsx` -- add CSS confetti animation
+- `src/index.css` -- add keyframe animations for bounce, confetti, and slide transitions
+
+**Approach:**
+- All animations use CSS keyframes and Tailwind classes (no external animation libraries)
+- Step transitions managed via React state + CSS `transition` / `animation` properties
+- Live preview card uses the same data object already passed as props
+- Fully responsive -- preview card stacks below form on mobile
