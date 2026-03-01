@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Progress } from "@/components/ui/progress";
 import OnboardingStep1 from "@/components/onboarding/OnboardingStep1";
 import OnboardingStep2 from "@/components/onboarding/OnboardingStep2";
 import OnboardingStep3 from "@/components/onboarding/OnboardingStep3";
 import OnboardingStep4 from "@/components/onboarding/OnboardingStep4";
 import ProfileComplete from "@/components/onboarding/ProfileComplete";
+import StepIndicator from "@/components/onboarding/StepIndicator";
+import StepTransition from "@/components/onboarding/StepTransition";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -25,8 +26,16 @@ export interface OnboardingData {
   lookingFor: string[];
 }
 
+const NUDGES = [
+  "Great start! 🚀",
+  "Nice — you're building your network! 🤝",
+  "Almost there! One more step! ⚡",
+  "Let's go! Finish strong! 🎯",
+];
+
 const Onboarding = () => {
   const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [showComplete, setShowComplete] = useState(false);
   const [saving, setSaving] = useState(false);
   const { user, refreshProfile } = useAuth();
@@ -46,11 +55,15 @@ const Onboarding = () => {
     lookingFor: [],
   });
 
-  const stepLabels = ["Basic Info", "Member Type", "Skills & Interests", "Looking For"];
-  const progress = (step / TOTAL_STEPS) * 100;
+  const stepLabels = ["Basics", "Type", "Skills", "Goals"];
 
   const updateData = (partial: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...partial }));
+  };
+
+  const goTo = (target: number) => {
+    setDirection(target > step ? "forward" : "back");
+    setStep(target);
   };
 
   const handleComplete = async () => {
@@ -58,7 +71,6 @@ const Onboarding = () => {
     setSaving(true);
 
     try {
-      // 1. Upload avatar if provided
       let avatarUrl = "";
       if (data.photoFile) {
         const ext = data.photoFile.name.split(".").pop();
@@ -71,7 +83,6 @@ const Onboarding = () => {
         avatarUrl = urlData.publicUrl;
       }
 
-      // 2. Update profile (using any since generated types may lag)
       const { error: profileErr } = await (supabase as any)
         .from("profiles")
         .update({
@@ -85,13 +96,11 @@ const Onboarding = () => {
         .eq("id", user.id);
       if (profileErr) throw profileErr;
 
-      // 3. Insert junction table data (clear first, then insert)
       const deleteAndInsert = async (
         table: string,
         column: string,
         values: string[]
       ) => {
-        // Using type assertion since generated types may not include new tables yet
         const client = supabase as any;
         await client.from(table).delete().eq("profile_id", user.id);
         if (values.length > 0) {
@@ -133,53 +142,57 @@ const Onboarding = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Progress bar */}
+      {/* Step indicator header */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-background border-b-2 border-foreground p-4">
-        <div className="container max-w-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
-              Step {step} of {TOTAL_STEPS}: {stepLabels[step - 1]}
-            </span>
-            <span className="font-mono text-xs text-muted-foreground">{Math.round(progress)}% complete</span>
-          </div>
-          <Progress value={progress} className="h-2 border border-foreground bg-card [&>div]:bg-accent" />
+        <div className="container max-w-2xl space-y-3">
+          <StepIndicator
+            currentStep={step}
+            totalSteps={TOTAL_STEPS}
+            labels={stepLabels}
+            onStepClick={goTo}
+          />
+          <p className="font-mono text-xs text-center text-accent font-bold">
+            {NUDGES[step - 1]}
+          </p>
         </div>
       </div>
 
       {/* Step content */}
-      <div className="container max-w-2xl pt-28 pb-12 px-4">
-        {step === 1 && (
-          <OnboardingStep1
-            data={data}
-            updateData={updateData}
-            onNext={() => setStep(2)}
-            onSkip={() => setStep(2)}
-          />
-        )}
-        {step === 2 && (
-          <OnboardingStep2
-            data={data}
-            updateData={updateData}
-            onNext={() => setStep(3)}
-            onBack={() => setStep(1)}
-          />
-        )}
-        {step === 3 && (
-          <OnboardingStep3
-            data={data}
-            updateData={updateData}
-            onNext={() => setStep(4)}
-            onBack={() => setStep(2)}
-          />
-        )}
-        {step === 4 && (
-          <OnboardingStep4
-            data={data}
-            updateData={updateData}
-            onComplete={handleComplete}
-            onBack={() => setStep(3)}
-          />
-        )}
+      <div className="container max-w-2xl pt-32 pb-12 px-4">
+        <StepTransition stepKey={step} direction={direction}>
+          {step === 1 && (
+            <OnboardingStep1
+              data={data}
+              updateData={updateData}
+              onNext={() => goTo(2)}
+              onSkip={() => goTo(2)}
+            />
+          )}
+          {step === 2 && (
+            <OnboardingStep2
+              data={data}
+              updateData={updateData}
+              onNext={() => goTo(3)}
+              onBack={() => goTo(1)}
+            />
+          )}
+          {step === 3 && (
+            <OnboardingStep3
+              data={data}
+              updateData={updateData}
+              onNext={() => goTo(4)}
+              onBack={() => goTo(2)}
+            />
+          )}
+          {step === 4 && (
+            <OnboardingStep4
+              data={data}
+              updateData={updateData}
+              onComplete={handleComplete}
+              onBack={() => goTo(3)}
+            />
+          )}
+        </StepTransition>
       </div>
     </div>
   );

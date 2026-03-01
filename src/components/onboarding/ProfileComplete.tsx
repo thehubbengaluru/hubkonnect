@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { CheckCircle } from "lucide-react";
 
 interface Props {
@@ -6,8 +6,30 @@ interface Props {
   onDone: () => void;
 }
 
+const CONFETTI_COLORS = [
+  "hsl(var(--accent))",
+  "hsl(var(--teal))",
+  "hsl(var(--destructive))",
+  "hsl(var(--info))",
+  "hsl(var(--foreground))",
+];
+
 const ProfileComplete = ({ matchCount, onDone }: Props) => {
   const [phase, setPhase] = useState<"check" | "text" | "dots" | "fade">("check");
+
+  const confettiPieces = useMemo(
+    () =>
+      Array.from({ length: 40 }, (_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 1.5}s`,
+        duration: `${1.5 + Math.random() * 1.5}s`,
+        color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+        size: 4 + Math.random() * 8,
+        rotation: Math.random() * 360,
+      })),
+    []
+  );
 
   useEffect(() => {
     const timers = [
@@ -25,6 +47,26 @@ const ProfileComplete = ({ matchCount, onDone }: Props) => {
         phase === "fade" ? "opacity-0" : "opacity-100"
       }`}
     >
+      {/* Confetti */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {confettiPieces.map((piece) => (
+          <div
+            key={piece.id}
+            className="absolute animate-confetti-fall"
+            style={{
+              left: piece.left,
+              top: -20,
+              width: piece.size,
+              height: piece.size * (Math.random() > 0.5 ? 1 : 2.5),
+              backgroundColor: piece.color,
+              animationDelay: piece.delay,
+              animationDuration: piece.duration,
+              transform: `rotate(${piece.rotation}deg)`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Checkmark */}
       <div className={`transition-all duration-500 ${phase === "check" ? "scale-0 opacity-0" : "scale-100 opacity-100"}`}>
         <div className="h-24 w-24 border-4 border-foreground bg-accent flex items-center justify-center shadow-brutal-lg mb-8">

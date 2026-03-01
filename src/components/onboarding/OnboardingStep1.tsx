@@ -1,9 +1,10 @@
 import { useRef } from "react";
-import { Camera, ArrowRight } from "lucide-react";
+import { Camera, ArrowRight, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { OnboardingData } from "@/pages/Onboarding";
 
 interface Props {
@@ -13,8 +14,37 @@ interface Props {
   onSkip: () => void;
 }
 
+const LivePreview = ({ data }: { data: OnboardingData }) => (
+  <div className="border-2 border-foreground bg-card p-5 shadow-brutal-sm space-y-3">
+    <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+      Live Preview
+    </p>
+    <div className="flex items-start gap-4">
+      <div className="h-16 w-16 border-2 border-foreground bg-background flex-shrink-0 flex items-center justify-center overflow-hidden">
+        {data.photoPreview ? (
+          <img src={data.photoPreview} alt="Preview" className="h-full w-full object-cover" />
+        ) : (
+          <User className="h-6 w-6 text-muted-foreground" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0 space-y-1">
+        <h3 className="font-heading text-base uppercase truncate">
+          {data.fullName || "Your Name"}
+        </h3>
+        <p className="font-mono text-xs text-muted-foreground line-clamp-2">
+          {data.bio || "Your bio will appear here..."}
+        </p>
+        {data.instagram && (
+          <p className="font-mono text-[10px] text-accent truncate">{data.instagram}</p>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
 const OnboardingStep1 = ({ data, updateData, onNext, onSkip }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -25,11 +55,12 @@ const OnboardingStep1 = ({ data, updateData, onNext, onSkip }: Props) => {
 
   const bioLength = data.bio.length;
   const bioColor = bioLength > 150 ? "text-destructive" : bioLength > 140 ? "text-accent" : "text-muted-foreground";
+  const bioPercent = Math.min((bioLength / 150) * 100, 100);
 
   const canNext = data.fullName.trim() && data.bio.trim() && bioLength <= 150;
 
-  return (
-    <div className="space-y-8">
+  const formContent = (
+    <div className="space-y-8 flex-1">
       <div className="text-center space-y-2">
         <h1 className="font-heading text-3xl md:text-4xl uppercase">Let's set up your profile</h1>
         <p className="font-mono text-sm text-muted-foreground">
@@ -86,7 +117,18 @@ const OnboardingStep1 = ({ data, updateData, onNext, onSkip }: Props) => {
             className="border-2 border-foreground bg-background font-mono resize-y min-h-[96px]"
             maxLength={160}
           />
-          <p className={`font-mono text-[11px] ${bioColor}`}>{bioLength}/150 characters</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-1.5 bg-muted border border-foreground/20 overflow-hidden">
+              <div
+                className="h-full transition-all duration-200"
+                style={{
+                  width: `${bioPercent}%`,
+                  backgroundColor: bioLength > 150 ? "hsl(var(--destructive))" : bioLength > 140 ? "hsl(var(--accent))" : "hsl(var(--foreground))",
+                }}
+              />
+            </div>
+            <p className={`font-mono text-[11px] ${bioColor}`}>{bioLength}/150</p>
+          </div>
         </div>
 
         <div className="space-y-1.5">
@@ -130,6 +172,15 @@ const OnboardingStep1 = ({ data, updateData, onNext, onSkip }: Props) => {
         >
           Next: Member Type <ArrowRight className="h-4 w-4" />
         </Button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={isMobile ? "space-y-6" : "flex gap-8 items-start"}>
+      {formContent}
+      <div className={isMobile ? "" : "w-72 flex-shrink-0 sticky top-36"}>
+        <LivePreview data={data} />
       </div>
     </div>
   );
