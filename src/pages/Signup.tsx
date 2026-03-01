@@ -78,7 +78,7 @@ const Signup = () => {
             <div className="inline-flex h-14 w-14 border-2 border-foreground bg-accent items-center justify-center mx-auto shadow-brutal-sm">
               <span className="font-heading text-2xl">H</span>
             </div>
-            <h1 className="font-heading text-2xl md:text-3xl uppercase">Join Community Connector</h1>
+            <h1 className="font-heading text-2xl md:text-3xl uppercase">Join Hub Konnect</h1>
             <p className="font-mono text-sm text-muted-foreground">Connect with 500+ creators at The Hub</p>
           </div>
 

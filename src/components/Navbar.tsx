@@ -28,7 +28,7 @@ const Navbar = () => {
               <span className="font-heading text-base">H</span>
             </div>
             <span className="font-heading text-sm uppercase tracking-wide hidden sm:inline">
-              Community Connector
+              Hub Konnect
             </span>
           </Link>
 

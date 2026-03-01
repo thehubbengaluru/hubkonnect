@@ -29,7 +29,7 @@ const steps = [
 
 const testimonials = [
   {
-    quote: "I met my video co-producer through Community Connector. We've already shipped 3 projects together. Total game changer for my documentary work.",
+    quote: "I met my video co-producer through Hub Konnect. We've already shipped 3 projects together. Total game changer for my documentary work.",
     name: "Riya Sharma",
     role: "Documentary Filmmaker",
     initials: "RS",
@@ -68,7 +68,7 @@ const Index = () => {
         <div className="container flex h-[72px] md:h-20 items-center justify-between">
           <Link to="/" className="flex flex-col">
             <span className="font-heading text-base md:text-lg uppercase leading-tight">
-              Community Connector
+              Hub Konnect
             </span>
             <span className="font-mono text-[10px] md:text-xs text-muted-foreground">by The Hub Bengaluru</span>
           </Link>
@@ -147,7 +147,7 @@ const Index = () => {
             You joined to find people who get your ideas, share your ambition, and want to build with you.
           </p>
           <p className="font-mono text-sm md:text-base text-foreground font-bold max-w-lg mx-auto">
-            Community Connector helps you connect with purpose — in minutes, not months.
+            Hub Konnect helps you connect with purpose — in minutes, not months.
           </p>
         </div>
       </section>
@@ -289,7 +289,7 @@ const Index = () => {
             Your next collaborator is already at The Hub
           </h2>
           <p className="font-mono text-sm md:text-base text-primary-foreground/70 max-w-lg mx-auto leading-relaxed">
-            Join {memberCount > 0 ? `${memberCount}` : "the first"} members using Community Connector to turn chance encounters at The Hub into real projects, products, and partnerships.
+            Join {memberCount > 0 ? `${memberCount}` : "the first"} members using Hub Konnect to turn chance encounters at The Hub into real projects, products, and partnerships.
           </p>
           <p className="font-mono text-sm text-primary-foreground/50">
             Get your first curated matches in under 5 minutes — it's free for Hub members.
@@ -307,7 +307,7 @@ const Index = () => {
       <footer className="py-8 px-4 border-t-2 border-foreground">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="font-mono text-xs text-muted-foreground">
-            Community Connector by <span className="font-bold text-foreground">The Hub Bengaluru</span>
+            Hub Konnect by <span className="font-bold text-foreground">The Hub Bengaluru</span>
           </p>
           <div className="flex items-center gap-4 font-mono text-xs">
             <a href="#" className="text-muted-foreground hover:text-foreground underline underline-offset-2">About</a>

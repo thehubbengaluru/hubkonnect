@@ -41,7 +41,7 @@ const FirstMatches = () => {
               <X className="h-5 w-5" />
             </button>
             <h2 className="font-heading text-2xl md:text-3xl uppercase mb-2">
-              Welcome to Community Connector! 👋
+              Welcome to Hub Konnect! 👋
             </h2>
             <p className="font-mono text-sm text-primary-foreground/70 max-w-xl">
               Here are {sorted.length} people we think you'll vibe with based on your skills, interests, and what you're looking for.
