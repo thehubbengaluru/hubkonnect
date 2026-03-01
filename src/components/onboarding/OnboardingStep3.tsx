@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, X, ArrowLeft, ArrowRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,25 @@ const TagPicker = ({ title, subtitle, searchPlaceholder, categories, selected, o
   const [search, setSearch] = useState("");
   const [customInput, setCustomInput] = useState("");
   const [showCustom, setShowCustom] = useState(false);
+  const [lastToggled, setLastToggled] = useState<string | null>(null);
+  const [countPop, setCountPop] = useState(false);
+  const prevCount = useRef(selected.length);
+
+  // Animate count changes
+  useEffect(() => {
+    if (selected.length !== prevCount.current) {
+      setCountPop(true);
+      prevCount.current = selected.length;
+      const t = setTimeout(() => setCountPop(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [selected.length]);
+
+  const handleToggle = (item: string) => {
+    setLastToggled(item);
+    onToggle(item);
+    setTimeout(() => setLastToggled(null), 300);
+  };
 
   const allItems = Object.values(categories).flat();
   const filteredCategories = search
@@ -77,9 +96,11 @@ const TagPicker = ({ title, subtitle, searchPlaceholder, categories, selected, o
                   <button
                     key={item}
                     type="button"
-                    onClick={() => !atLimit && onToggle(item)}
+                    onClick={() => !atLimit && handleToggle(item)}
                     disabled={atLimit}
                     className={`inline-flex items-center gap-1 px-3 py-1.5 text-sm font-mono border-2 transition-all ${
+                      lastToggled === item ? "animate-pill-bounce" : ""
+                    } ${
                       isSelected
                         ? "border-foreground bg-foreground text-background shadow-brutal-sm -translate-x-px -translate-y-px"
                         : atLimit
@@ -138,7 +159,7 @@ const TagPicker = ({ title, subtitle, searchPlaceholder, categories, selected, o
       {selected.length > 0 && (
         <div className="border-2 border-foreground bg-card p-4 space-y-2">
           <p className="font-mono text-xs font-bold uppercase tracking-wider">
-            Selected ({selected.length}/{MAX_SELECTIONS})
+            Selected (<span className={countPop ? "animate-count-pop inline-block" : "inline-block"}>{selected.length}</span>/{MAX_SELECTIONS})
           </p>
           <div className="flex flex-wrap gap-2">
             {selected.map((item) => (
@@ -188,6 +209,13 @@ const OnboardingStep3 = ({ data, updateData, onNext, onBack }: Props) => {
 
   return (
     <div className="space-y-12">
+      {/* Encouragement nudge */}
+      <div className="text-center">
+        <p className="font-mono text-xs text-accent font-bold">
+          💡 People with 5+ skills get 3x more connections
+        </p>
+      </div>
+
       <TagPicker
         title="What are you skilled at?"
         subtitle={`Select ${MIN_SELECTIONS}-${MAX_SELECTIONS} skills to help others find you`}

@@ -46,7 +46,7 @@ const OnboardingStep2 = ({ data, updateData, onNext, onBack }: Props) => {
               onClick={() => toggle(id)}
               className={`relative border-2 border-foreground p-6 text-center transition-all text-left ${
                 selected
-                  ? "bg-accent shadow-brutal-sm -translate-x-0.5 -translate-y-0.5"
+                  ? "bg-accent shadow-brutal-sm -translate-x-0.5 -translate-y-0.5 animate-pill-bounce"
                   : "bg-card hover:bg-accent/10 shadow-brutal-sm hover:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5"
               }`}
             >
