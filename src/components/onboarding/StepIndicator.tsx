@@ -28,7 +28,7 @@ const StepIndicator = ({ currentStep, totalSteps, labels, onStepClick }: Props) 
               }`}
             >
               <div
-                className={`h-10 w-10 border-2 border-foreground flex items-center justify-center font-mono text-sm font-bold transition-all duration-300 ${
+                className={`h-8 w-8 sm:h-10 sm:w-10 border-2 border-foreground flex items-center justify-center font-mono text-xs sm:text-sm font-bold transition-all duration-300 ${
                   isCompleted
                     ? "bg-foreground text-background"
                     : isCurrent
@@ -43,7 +43,7 @@ const StepIndicator = ({ currentStep, totalSteps, labels, onStepClick }: Props) 
                 )}
               </div>
               <span
-                className={`font-mono text-[10px] uppercase tracking-wider whitespace-nowrap ${
+                className={`font-mono text-[9px] sm:text-[10px] uppercase tracking-wider whitespace-nowrap ${
                   isCurrent ? "text-foreground font-bold" : "text-muted-foreground"
                 }`}
               >

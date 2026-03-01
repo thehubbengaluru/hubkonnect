@@ -190,24 +190,27 @@ const Profile = () => {
 
         {!isOwner && (
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-foreground p-4 md:pb-4 pb-20">
-            <div className="container max-w-3xl flex gap-3">
+          <div className="container max-w-3xl flex gap-2 sm:gap-3">
               {isConnected ? (
-                <Button disabled className="flex-1 h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-sm gap-2">
+                <Button disabled className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
                   Connected ✓
                 </Button>
               ) : hasPending ? (
-                <Button disabled className="flex-1 h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-sm gap-2">
-                  Request Pending
+                <Button disabled className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
+                  Pending
                 </Button>
               ) : (
                 <Button onClick={handleConnect} disabled={sendConn.isPending}
-                  className="flex-1 h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2">
-                  Send Connection Request <ArrowRight className="h-4 w-4" />
+                  className="flex-1 h-12 sm:h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
+                  <span className="hidden sm:inline">Send Connection Request</span>
+                  <span className="sm:hidden">Connect</span>
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               )}
               <Button variant="outline" onClick={() => navigate(-1)}
-                className="flex-1 h-14 border-2 border-foreground font-mono text-sm uppercase tracking-wider hover:bg-card">
-                Maybe Later
+                className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider hover:bg-card">
+                <span className="hidden sm:inline">Maybe Later</span>
+                <span className="sm:hidden">Later</span>
               </Button>
             </div>
           </div>

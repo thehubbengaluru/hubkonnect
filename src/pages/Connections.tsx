@@ -40,14 +40,14 @@ const Connections = () => {
         </p>
 
         <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="w-full justify-start bg-transparent border-b-2 border-foreground rounded-none p-0 h-auto gap-0">
-            <TabsTrigger value="pending" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-xs uppercase tracking-wider px-4 py-3">
+          <TabsList className="w-full justify-start bg-transparent border-b-2 border-foreground rounded-none p-0 h-auto gap-0 overflow-x-auto">
+            <TabsTrigger value="pending" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
               Pending ({pending.length})
             </TabsTrigger>
-            <TabsTrigger value="sent" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-xs uppercase tracking-wider px-4 py-3">
+            <TabsTrigger value="sent" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
               Sent ({sent.length})
             </TabsTrigger>
-            <TabsTrigger value="connections" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-xs uppercase tracking-wider px-4 py-3">
+            <TabsTrigger value="connections" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
               Connections ({accepted.length})
             </TabsTrigger>
           </TabsList>
@@ -83,18 +83,18 @@ const Connections = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                       <Button size="sm" onClick={() => acceptMut.mutate(req.id)} disabled={acceptMut.isPending}
-                        className="h-9 px-4 border-2 border-foreground font-mono text-xs uppercase tracking-wider shadow-brutal-sm gap-1">
+                        className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider shadow-brutal-sm gap-1">
                         <Check className="h-3.5 w-3.5" /> Accept
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => declineMut.mutate(req.id)} disabled={declineMut.isPending}
-                        className="h-9 px-4 font-mono text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 gap-1">
+                        className="h-8 sm:h-9 px-2.5 sm:px-4 font-mono text-[10px] sm:text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 gap-1">
                         <X className="h-3.5 w-3.5" /> Decline
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${req.profile.id}`)}
-                        className="h-9 px-4 border-2 border-foreground font-mono text-xs uppercase tracking-wider gap-1">
-                        <Eye className="h-3.5 w-3.5" /> View Profile
+                        className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider gap-1">
+                        <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">View Profile</span><span className="sm:hidden">View</span>
                       </Button>
                     </div>
 

@@ -41,7 +41,7 @@ const Messages = () => {
         <h1 className="font-heading text-3xl md:text-4xl uppercase mb-1">Messages</h1>
         <p className="font-mono text-sm text-muted-foreground mb-6">Chat with your connections</p>
 
-        <div className="border-2 border-foreground bg-card shadow-brutal flex h-[60vh] md:h-[65vh]">
+        <div className="border-2 border-foreground bg-card shadow-brutal flex h-[calc(100vh-14rem)] sm:h-[60vh] md:h-[65vh]">
           {/* Conversation list */}
           <div className={`w-full md:w-80 border-r-2 border-foreground flex flex-col ${activeChat ? "hidden md:flex" : "flex"}`}>
             <div className="p-3 border-b-2 border-foreground">
