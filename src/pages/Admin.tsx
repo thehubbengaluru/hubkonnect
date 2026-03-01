@@ -49,7 +49,7 @@ const Admin = () => {
               <h2 className="font-heading text-xl uppercase mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" /> Activation Funnel
               </h2>
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 <StatCard label="Total Signups" value={stats.totalSignups} icon={Users} />
                 <StatCard label="Onboarding Done" value={stats.onboardingCompleted}
                   sub={`${stats.totalSignups > 0 ? Math.round((stats.onboardingCompleted / stats.totalSignups) * 100) : 0}% conversion`} />
@@ -65,7 +65,7 @@ const Admin = () => {
               <h2 className="font-heading text-xl uppercase mb-4 flex items-center gap-2">
                 <Activity className="h-5 w-5" /> Engagement
               </h2>
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 <StatCard label="Daily Active" value={stats.dailyActive}
                   sub={`${stats.totalSignups > 0 ? Math.round((stats.dailyActive / stats.totalSignups) * 100) : 0}% DAU`} />
                 <StatCard label="Weekly Active" value={stats.weeklyActive}
@@ -80,7 +80,7 @@ const Admin = () => {
               <h2 className="font-heading text-xl uppercase mb-4 flex items-center gap-2">
                 <Link2 className="h-5 w-5" /> Connection Funnel
               </h2>
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 <StatCard label="Total Requests" value={stats.totalRequests} />
                 <StatCard label="Accepted" value={stats.acceptedRequests} sub={`${stats.acceptRate}% accept rate`} />
                 <StatCard label="0 Connections" value={stats.zeroConnectionUsers.length}

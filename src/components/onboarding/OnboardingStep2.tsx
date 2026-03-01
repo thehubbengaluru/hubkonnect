@@ -83,9 +83,11 @@ const OnboardingStep2 = ({ data, updateData, onNext, onBack }: Props) => {
         <Button
           onClick={onNext}
           disabled={data.memberTypes.length === 0}
-          className="h-14 px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2"
+          className="h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2"
         >
-          Next: Add Skills <ArrowRight className="h-4 w-4" />
+          <span className="hidden sm:inline">Next: Add Skills</span>
+          <span className="sm:hidden">Next</span>
+          <ArrowRight className="h-4 w-4" />
         </Button>
       </div>
     </div>

@@ -330,7 +330,7 @@ const MyProfile = () => {
         <div className="flex border-2 border-foreground mb-4 bg-card">
           {PRIVACY_OPTIONS.map((opt) => (
             <button key={opt.id} onClick={() => update({ privacy: opt.id })}
-              className={`flex-1 py-2.5 font-mono text-[11px] uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 ${
+              className={`flex-1 py-2 sm:py-2.5 font-mono text-[9px] sm:text-[11px] uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 ${
                 profile.privacy === opt.id ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
               }`}>
               {opt.label}
@@ -341,13 +341,13 @@ const MyProfile = () => {
         {/* Preview / Edit toggle */}
         <div className="flex border-2 border-foreground mb-8 bg-card">
           <button onClick={() => setMode("preview")}
-            className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border-r-2 border-foreground ${
+            className={`flex-1 py-2 sm:py-2.5 font-mono text-[10px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 transition-all border-r-2 border-foreground ${
               mode === "preview" ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
             }`}>
             <Eye className="h-3.5 w-3.5" /> Preview
           </button>
           <button onClick={() => setMode("edit")}
-            className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
+            className={`flex-1 py-2 sm:py-2.5 font-mono text-[10px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 transition-all ${
               mode === "edit" ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
             }`}>
             <Pencil className="h-3.5 w-3.5" /> Edit
@@ -577,8 +577,8 @@ const MyProfile = () => {
                 className="font-mono text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors">
                 Cancel Changes
               </button>
-              <Button onClick={handleSave} disabled={!hasChanges || saving}
-                className="h-14 px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm">
+            <Button onClick={handleSave} disabled={!hasChanges || saving}
+                className="h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm">
                 {saving ? "Saving..." : "Save Changes"}
               </Button>
             </div>

@@ -85,10 +85,11 @@ const OnboardingStep4 = ({ data, updateData, onComplete, onBack }: Props) => {
         <Button
           onClick={onComplete}
           disabled={lookingFor.length === 0}
-          className="h-14 px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2"
+          className="h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2"
         >
           <Sparkles className="h-4 w-4" />
-          Complete Profile & See Matches
+          <span className="hidden sm:inline">Complete Profile & See Matches</span>
+          <span className="sm:hidden">Complete</span>
         </Button>
       </div>
     </div>
