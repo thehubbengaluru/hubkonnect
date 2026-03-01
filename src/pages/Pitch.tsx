@@ -28,7 +28,7 @@ const Pitch = () => {
           <img src={thbLogo} alt="The Hub Bengaluru" className="h-20 w-auto" />
           <div className="border-4 border-foreground p-8 md:p-12 shadow-brutal-lg bg-card">
             <h1 className="text-4xl md:text-6xl lg:text-7xl leading-tight">
-              Community Connector
+               Hub Konnect
             </h1>
             <div className="h-1 w-24 bg-accent mx-auto my-6" />
             <p className="font-mono text-lg md:text-xl text-muted-foreground">
@@ -202,7 +202,7 @@ const Pitch = () => {
             Let's launch this at The Hub
           </h2>
           <p className="font-mono text-lg mb-10 opacity-80">
-            Community Connector turns The Hub from a place people work <em>at</em> into a community people build <em>with</em>.
+            Hub Konnect turns The Hub from a place people work <em>at</em> into a community people build <em>with</em>.
           </p>
           <a href="/" className="print:hidden">
             <Button
