@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import ConcentricCircles from "@/components/ConcentricCircles";
-import thbLogo from "@/assets/thb-logo-optimized.webp";
+import thbLogo from "@/assets/thb-logo-nobg.webp";
 import { useBetaStats } from "@/hooks/use-beta-stats";
 
 const MEMBER_GOAL = 100;
