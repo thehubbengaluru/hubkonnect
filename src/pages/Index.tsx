@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import ConcentricCircles from "@/components/ConcentricCircles";
-import thbLogo from "@/assets/thb-logo.png";
+import thbLogo from "@/assets/thb-logo-optimized.webp";
 import { useBetaStats } from "@/hooks/use-beta-stats";
 
 const MEMBER_GOAL = 100;
@@ -96,7 +96,7 @@ const Index = () => {
             🚀 Early Access Beta
           </Badge>
 
-          <img src={thbLogo} alt="The Hub Bengaluru logo" className="h-24 md:h-32 mx-auto mb-2" />
+          <img src={thbLogo} alt="The Hub Bengaluru logo" className="h-24 md:h-32 mx-auto mb-2" width={128} height={128} />
           <h1 className="text-[2rem] sm:text-5xl md:text-6xl lg:text-[72px] font-heading uppercase leading-[0.95]">
             Turn your community
             <br />
