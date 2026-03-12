@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Search, Check, X, Clock, MessageCircle, Sparkles, Eye } from "lucide-react";
+import { Search, Check, X, Clock, MessageCircle, Sparkles, Eye, Users, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PageShell from "@/components/PageShell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
-import { useConnections, useAcceptConnection, useDeclineConnection, useCancelConnection } from "@/hooks/use-connections";
+import { useConnections, useAcceptConnection, useDeclineConnection, useCancelConnection, useRemoveConnection } from "@/hooks/use-connections";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const getInitials = (name: string) => name.split(" ").map((n) => n[0]).join("").toUpperCase();
 
@@ -17,9 +18,39 @@ const Connections = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const { data, isLoading } = useConnections(user?.id);
+  const { toast } = useToast();
   const acceptMut = useAcceptConnection();
   const declineMut = useDeclineConnection();
   const cancelMut = useCancelConnection();
+  const removeMut = useRemoveConnection();
+
+  const handleAccept = (id: string, name: string) => {
+    acceptMut.mutate(id, {
+      onSuccess: () => toast({ title: "Connection accepted!", description: `You and ${name} are now connected.` }),
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+  };
+
+  const handleDecline = (id: string) => {
+    declineMut.mutate(id, {
+      onSuccess: () => toast({ title: "Request declined" }),
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+  };
+
+  const handleCancel = (id: string) => {
+    cancelMut.mutate(id, {
+      onSuccess: () => toast({ title: "Request cancelled" }),
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+  };
+
+  const handleRemove = (id: string, name: string) => {
+    removeMut.mutate(id, {
+      onSuccess: () => toast({ title: "Connection removed", description: `You and ${name} are no longer connected.` }),
+      onError: (err: any) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    });
+  };
 
   const pending = data?.pending ?? [];
   const sent = data?.sent ?? [];
@@ -57,8 +88,10 @@ const Connections = () => {
             {isLoading ? (
               <Skeleton className="h-32 border-2 border-foreground" />
             ) : pending.length === 0 ? (
-              <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal">
-                No pending requests
+              <div className="border-2 border-foreground bg-card p-8 text-center shadow-brutal space-y-3">
+                <Users className="h-8 w-8 mx-auto text-muted-foreground" />
+                <p className="font-mono text-sm text-muted-foreground">No pending requests</p>
+                <p className="font-mono text-xs text-muted-foreground">When someone wants to connect with you, it'll show up here.</p>
               </div>
             ) : pending.map((req) => (
               <div key={req.id} className="border-2 border-foreground bg-card p-5 shadow-brutal">
@@ -84,13 +117,13 @@ const Connections = () => {
                     )}
 
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                      <Button size="sm" onClick={() => acceptMut.mutate(req.id)} disabled={acceptMut.isPending}
+                      <Button size="sm" onClick={() => handleAccept(req.id, req.profile.full_name)} disabled={acceptMut.isPending}
                         className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider shadow-brutal-sm gap-1">
-                        <Check className="h-3.5 w-3.5" /> Accept
+                        <Check className="h-3.5 w-3.5" /> {acceptMut.isPending ? "Accepting..." : "Accept"}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => declineMut.mutate(req.id)} disabled={declineMut.isPending}
+                      <Button variant="ghost" size="sm" onClick={() => handleDecline(req.id)} disabled={declineMut.isPending}
                         className="h-8 sm:h-9 px-2.5 sm:px-4 font-mono text-[10px] sm:text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 gap-1">
-                        <X className="h-3.5 w-3.5" /> Decline
+                        <X className="h-3.5 w-3.5" /> {declineMut.isPending ? "Declining..." : "Decline"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${req.profile.id}`)}
                         className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider gap-1">
@@ -110,8 +143,13 @@ const Connections = () => {
             {isLoading ? (
               <Skeleton className="h-32 border-2 border-foreground" />
             ) : sent.length === 0 ? (
-              <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal">
-                No sent requests
+              <div className="border-2 border-foreground bg-card p-8 text-center shadow-brutal space-y-3">
+                <Sparkles className="h-8 w-8 mx-auto text-muted-foreground" />
+                <p className="font-mono text-sm text-muted-foreground">No sent requests</p>
+                <Button variant="outline" size="sm" onClick={() => navigate("/for-you")}
+                  className="border-2 border-foreground font-mono text-xs uppercase tracking-wider">
+                  Find People to Connect With
+                </Button>
               </div>
             ) : sent.map((req) => (
               <div key={req.id} className="border-2 border-foreground bg-card p-5 shadow-brutal">
@@ -135,9 +173,9 @@ const Connections = () => {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => cancelMut.mutate(req.id)} disabled={cancelMut.isPending}
+                      <Button variant="ghost" size="sm" onClick={() => handleCancel(req.id)} disabled={cancelMut.isPending}
                         className="h-9 px-4 font-mono text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10">
-                        Cancel Request
+                        {cancelMut.isPending ? "Cancelling..." : "Cancel Request"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${req.profile.id}`)}
                         className="h-9 px-4 border-2 border-foreground font-mono text-xs uppercase tracking-wider gap-1">
@@ -165,8 +203,17 @@ const Connections = () => {
                 {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-48 border-2 border-foreground" />)}
               </div>
             ) : filteredConnections.length === 0 ? (
-              <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal mt-4">
-                {searchQuery ? `No connections found matching "${searchQuery}"` : "No connections yet"}
+              <div className="border-2 border-foreground bg-card p-8 text-center shadow-brutal mt-4 space-y-3">
+                <Users className="h-8 w-8 mx-auto text-muted-foreground" />
+                <p className="font-mono text-sm text-muted-foreground">
+                  {searchQuery ? `No connections found matching "${searchQuery}"` : "No connections yet"}
+                </p>
+                {!searchQuery && (
+                  <Button variant="outline" size="sm" onClick={() => navigate("/for-you")}
+                    className="border-2 border-foreground font-mono text-xs uppercase tracking-wider">
+                    Browse People
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -190,6 +237,10 @@ const Connections = () => {
                       <button onClick={() => navigate(`/profile/${conn.profile.id}`)}
                         className="w-full font-mono text-[10px] text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors py-1">
                         View Profile
+                      </button>
+                      <button onClick={() => handleRemove(conn.id, conn.profile.full_name)} disabled={removeMut.isPending}
+                        className="w-full font-mono text-[10px] text-destructive hover:text-destructive/80 transition-colors py-1 flex items-center justify-center gap-1">
+                        <UserMinus className="h-3 w-3" /> {removeMut.isPending ? "Removing..." : "Remove"}
                       </button>
                     </div>
                   </div>

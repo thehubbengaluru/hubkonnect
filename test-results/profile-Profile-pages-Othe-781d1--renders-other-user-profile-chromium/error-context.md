@@ -1,0 +1,69 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "H Hub Konnect" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: H
+          - generic [ref=e9]: Hub Konnect
+        - navigation [ref=e10]:
+          - link "For You" [ref=e11] [cursor=pointer]:
+            - /url: /for-you
+            - button "For You" [ref=e12]:
+              - img
+              - text: For You
+          - link "Connections" [ref=e13] [cursor=pointer]:
+            - /url: /connections
+            - button "Connections" [ref=e14]:
+              - img
+              - text: Connections
+          - link "Messages" [ref=e15] [cursor=pointer]:
+            - /url: /messages
+            - button "Messages" [ref=e16]:
+              - img
+              - text: Messages
+          - link "Profile" [ref=e17] [cursor=pointer]:
+            - /url: /profile
+            - button "Profile" [ref=e18]:
+              - img
+              - text: Profile
+        - generic [ref=e19]:
+          - button "Toggle theme" [ref=e20] [cursor=pointer]:
+            - img
+            - img
+          - button [ref=e21] [cursor=pointer]:
+            - img
+          - button "Sign out" [ref=e22] [cursor=pointer]:
+            - img
+    - main [ref=e23]:
+      - generic [ref=e24]:
+        - button "Back" [ref=e26] [cursor=pointer]:
+          - img [ref=e27]
+          - text: Back
+        - generic [ref=e30]:
+          - generic [ref=e33]: OU
+          - generic [ref=e34]:
+            - heading "Other User" [level=1] [ref=e35]
+            - generic [ref=e36]: 50% Match
+          - paragraph [ref=e38]: This is another user's bio
+          - generic [ref=e39]:
+            - heading "Why We Matched" [level=3] [ref=e40]:
+              - img [ref=e41]
+              - text: Why We Matched
+            - list [ref=e43]:
+              - listitem [ref=e44]:
+                - generic [ref=e45]: •
+                - text: Hub community member
+        - generic [ref=e47]:
+          - button "Send Connection Request" [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: Send Connection Request
+            - img
+          - button "Maybe Later" [ref=e50] [cursor=pointer]:
+            - generic [ref=e51]: Maybe Later
+```

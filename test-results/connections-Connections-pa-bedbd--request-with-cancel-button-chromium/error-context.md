@@ -1,0 +1,70 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "H Hub Konnect" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e8]: H
+          - generic [ref=e9]: Hub Konnect
+        - navigation [ref=e10]:
+          - link "For You" [ref=e11] [cursor=pointer]:
+            - /url: /for-you
+            - button "For You" [ref=e12]:
+              - img
+              - text: For You
+          - link "Connections" [ref=e13] [cursor=pointer]:
+            - /url: /connections
+            - button "Connections" [ref=e14]:
+              - img
+              - text: Connections
+          - link "Messages" [ref=e15] [cursor=pointer]:
+            - /url: /messages
+            - button "Messages" [ref=e16]:
+              - img
+              - text: Messages
+          - link "Profile" [ref=e17] [cursor=pointer]:
+            - /url: /profile
+            - button "Profile" [ref=e18]:
+              - img
+              - text: Profile
+        - generic [ref=e19]:
+          - button "Toggle theme" [ref=e20] [cursor=pointer]:
+            - img
+            - img
+          - button "1" [ref=e21] [cursor=pointer]:
+            - img
+            - generic [ref=e22]: "1"
+          - button "Sign out" [ref=e23] [cursor=pointer]:
+            - img
+    - main [ref=e24]:
+      - generic [ref=e25]:
+        - heading "My Connections" [level=1] [ref=e26]
+        - paragraph [ref=e27]: People you've connected with at The Hub
+        - generic [ref=e28]:
+          - tablist [ref=e29]:
+            - tab "Pending (1)" [ref=e30] [cursor=pointer]
+            - tab "Sent (1)" [active] [selected] [ref=e31] [cursor=pointer]
+            - tab "Connections (2)" [ref=e32] [cursor=pointer]
+          - tabpanel "Sent (1)" [ref=e33]:
+            - generic [ref=e35]:
+              - generic [ref=e37]: AS
+              - generic [ref=e38]:
+                - heading "Alice Sender" [level=3] [ref=e39]
+                - generic [ref=e40]:
+                  - img [ref=e41]
+                  - text: Pending · 3 months ago
+                - generic [ref=e44]:
+                  - paragraph [ref=e45]: "Your message:"
+                  - paragraph [ref=e46]: "\"Let's connect!\""
+                - generic [ref=e47]:
+                  - button "Cancel Request" [ref=e48] [cursor=pointer]
+                  - button "View Profile" [ref=e49] [cursor=pointer]:
+                    - img
+                    - text: View Profile
+```

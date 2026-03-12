@@ -31,7 +31,15 @@ const Profile = () => {
       <PageShell>
         <div className="container max-w-3xl py-8 space-y-6">
           <Skeleton className="h-48 border-2 border-foreground" />
-          <Skeleton className="h-32 border-2 border-foreground" />
+          <div className="flex justify-center -mt-16 relative z-10">
+            <Skeleton className="h-32 w-32 border-2 border-foreground" />
+          </div>
+          <Skeleton className="h-8 w-48 mx-auto" />
+          <Skeleton className="h-24 border-2 border-foreground" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-32 border-2 border-foreground" />
+            <Skeleton className="h-32 border-2 border-foreground" />
+          </div>
         </div>
       </PageShell>
     );
@@ -77,7 +85,7 @@ const Profile = () => {
     <PageShell>
       <div className="min-h-screen">
         <div className="container pt-4">
-          <button onClick={() => navigate(-1)}
+          <button onClick={() => navigate("/for-you")}
             className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
@@ -177,7 +185,7 @@ const Profile = () => {
                     <Instagram className="h-5 w-5" />
                   </a>
                 )}
-                {profile.linkedin && (
+                {profile.linkedin && /^(www\.)?linkedin\.com\//.test(profile.linkedin) && (
                   <a href={`https://${profile.linkedin}`} target="_blank" rel="noopener noreferrer"
                     className="h-11 w-11 border-2 border-foreground flex items-center justify-center bg-background hover:bg-accent hover:shadow-brutal-sm transition-all">
                     <Linkedin className="h-5 w-5" />
@@ -189,7 +197,7 @@ const Profile = () => {
         </div>
 
         {!isOwner && (
-          <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-foreground p-4 md:pb-4 pb-20">
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t-2 border-foreground p-4 md:pb-4 pb-[5.5rem]">
           <div className="container max-w-3xl flex gap-2 sm:gap-3">
               {isConnected ? (
                 <Button disabled className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
@@ -207,7 +215,7 @@ const Profile = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               )}
-              <Button variant="outline" onClick={() => navigate(-1)}
+              <Button variant="outline" onClick={() => navigate("/for-you")}
                 className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider hover:bg-card">
                 <span className="hidden sm:inline">Maybe Later</span>
                 <span className="sm:hidden">Later</span>

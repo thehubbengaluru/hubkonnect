@@ -27,6 +27,8 @@ const Signup = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Please enter a valid email";
     if (!password) e.password = "This field is required";
     else if (password.length < 8) e.password = "Password must be at least 8 characters";
+    else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password))
+      e.password = "Must contain uppercase, lowercase, and a number";
     if (!agreed) e.agreed = "You must agree to the terms";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -42,7 +44,7 @@ const Signup = () => {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
@@ -127,11 +129,32 @@ const Signup = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="font-mono text-[11px] text-muted-foreground">At least 8 characters</p>
+              {password.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${password.length >= 8 ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${password.length >= 8 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>At least 8 characters</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(password) ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${/[A-Z]/.test(password) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>One uppercase letter</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${/[a-z]/.test(password) ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${/[a-z]/.test(password) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>One lowercase letter</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${/[0-9]/.test(password) ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${/[0-9]/.test(password) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>One number</span>
+                  </div>
+                </div>
+              )}
+              {!password && <p className="font-mono text-[11px] text-muted-foreground">At least 8 characters</p>}
               {errors.password && <p className="font-mono text-xs text-destructive">{errors.password}</p>}
             </div>
 

@@ -10,16 +10,20 @@ export interface ProfileWithDetails {
   avatar_url: string;
   privacy: string;
   onboarding_completed: boolean;
+  created_at: string;
+  last_seen_at: string | null;
   skills: string[];
   interests: string[];
   looking_for: string[];
   member_types: string[];
 }
 
+const PROFILE_COLUMNS = "id, full_name, bio, instagram, linkedin, avatar_url, privacy, onboarding_completed, created_at, last_seen_at";
+
 async function fetchProfileWithDetails(profileId: string): Promise<ProfileWithDetails | null> {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("*")
+    .select(PROFILE_COLUMNS)
     .eq("id", profileId)
     .maybeSingle();
   if (!profile) return null;
@@ -39,6 +43,8 @@ async function fetchProfileWithDetails(profileId: string): Promise<ProfileWithDe
     avatar_url: profile.avatar_url ?? "",
     privacy: profile.privacy ?? "public",
     onboarding_completed: profile.onboarding_completed ?? false,
+    created_at: profile.created_at ?? "",
+    last_seen_at: profile.last_seen_at ?? null,
     skills: (skills.data ?? []).map((r) => r.skill),
     interests: (interests.data ?? []).map((r) => r.interest),
     looking_for: (lookingFor.data ?? []).map((r) => r.looking_for),
@@ -55,14 +61,17 @@ export function useProfileById(profileId: string | undefined) {
   });
 }
 
+const ALL_PROFILES_LIMIT = 200;
+
 export function useAllProfiles(excludeUserId?: string) {
   return useQuery({
     queryKey: ["all-profiles", excludeUserId],
     queryFn: async () => {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("*")
-        .eq("onboarding_completed", true);
+        .select(PROFILE_COLUMNS)
+        .eq("onboarding_completed", true)
+        .limit(ALL_PROFILES_LIMIT);
 
       if (!profiles || profiles.length === 0) return [];
 
@@ -101,6 +110,8 @@ export function useAllProfiles(excludeUserId?: string) {
           avatar_url: p.avatar_url ?? "",
           privacy: p.privacy ?? "public",
           onboarding_completed: p.onboarding_completed ?? false,
+          created_at: p.created_at ?? "",
+          last_seen_at: p.last_seen_at ?? null,
           skills: skillsMap[p.id] ?? [],
           interests: interestsMap[p.id] ?? [],
           looking_for: lookingForMap[p.id] ?? [],

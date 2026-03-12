@@ -1,0 +1,60 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - button "1 Basics" [disabled] [ref=e8]:
+          - generic [ref=e9]: "1"
+          - generic [ref=e10]: Basics
+        - button "2 Type" [disabled] [ref=e14]:
+          - generic [ref=e15]: "2"
+          - generic [ref=e16]: Type
+        - button "3 Skills" [disabled] [ref=e20]:
+          - generic [ref=e21]: "3"
+          - generic [ref=e22]: Skills
+        - button "4 Goals" [disabled] [ref=e26]:
+          - generic [ref=e27]: "4"
+          - generic [ref=e28]: Goals
+      - paragraph [ref=e29]: Great start! 🚀
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - heading "Let's set up your profile" [level=1] [ref=e35]
+          - paragraph [ref=e36]: Help others discover you by sharing a bit about yourself
+        - generic [ref=e37]:
+          - button [ref=e38] [cursor=pointer]:
+            - img [ref=e39]
+          - button "Add profile photo" [ref=e42] [cursor=pointer]
+          - generic [ref=e43]: (Optional — skip for now)
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]: Full Name *
+            - textbox "Riya Sharma" [ref=e47]
+          - generic [ref=e48]:
+            - generic [ref=e49]: Bio (150 characters) *
+            - textbox "Documentary filmmaker looking for creative collaborators..." [ref=e50]
+            - paragraph [ref=e53]: 0/150
+          - generic [ref=e54]:
+            - generic [ref=e55]: Instagram Handle (optional)
+            - textbox "@riyacreates" [ref=e56]
+          - generic [ref=e57]:
+            - generic [ref=e58]: LinkedIn URL (optional)
+            - textbox "linkedin.com/in/riyasharma" [ref=e59]
+        - generic [ref=e60]:
+          - button "Skip for now" [ref=e61] [cursor=pointer]
+          - 'button "Next: Member Type" [disabled]':
+            - generic: "Next: Member Type"
+            - img
+      - generic [ref=e63]:
+        - paragraph [ref=e64]: Live Preview
+        - generic [ref=e65]:
+          - img [ref=e67]
+          - generic [ref=e70]:
+            - heading "Your Name" [level=3] [ref=e71]
+            - paragraph [ref=e72]: Your bio will appear here...
+```

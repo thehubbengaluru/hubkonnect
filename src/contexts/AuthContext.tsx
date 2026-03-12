@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -33,9 +33,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, full_name, bio, instagram, linkedin, avatar_url, privacy, onboarding_completed, created_at, updated_at")
       .eq("id", userId)
       .single();
     setProfile(data as Profile | null);
@@ -45,23 +45,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) await fetchProfile(user.id);
   }, [user, fetchProfile]);
 
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+  }, []);
+
   useEffect(() => {
-    // Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Use setTimeout to avoid Supabase client deadlock
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
         }
         setLoading(false);
+
+        // Handle session expiry — redirect to login
+        if (event === "TOKEN_REFRESHED" && !session) {
+          window.location.href = "/login";
+        }
+        if (event === "SIGNED_OUT") {
+          setProfile(null);
+        }
       }
     );
 
-    // Then check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -74,15 +86,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-  };
+  const value = useMemo(
+    () => ({ user, session, profile, loading, signOut, refreshProfile }),
+    [user, session, profile, loading, signOut, refreshProfile]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

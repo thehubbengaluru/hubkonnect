@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronDown, Calendar, Palette } from "lucide-react";
+import { useState, useMemo, useCallback } from "react";
+import { ChevronDown, Calendar, Palette, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PageShell from "@/components/PageShell";
 import ProfileCard from "@/components/ProfileCard";
@@ -30,7 +30,7 @@ const ForYou = () => {
   const { data: myProfile } = useMyProfileDetails(user?.id);
   const { data: myConnections } = useMyConnectionsList(user?.id);
 
-  const getConnectionStatus = (profileId: string): "none" | "sent" | "pending" | "connected" => {
+  const getConnectionStatus = useCallback((profileId: string): "none" | "sent" | "pending" | "connected" => {
     const conn = (myConnections ?? []).find(
       (c) => (c.requester_id === profileId || c.receiver_id === profileId)
     );
@@ -39,26 +39,36 @@ const ForYou = () => {
     if (conn.status === "pending" && conn.requester_id === user?.id) return "sent";
     if (conn.status === "pending" && conn.receiver_id === user?.id) return "pending";
     return "none";
-  };
+  }, [myConnections, user?.id]);
 
-  // Compute matches
-  const matchedProfiles = (allProfiles ?? []).map((p) => {
-    const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
-    return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
-  });
+  // Compute matches — memoized to avoid O(n) on every render
+  const matchedProfiles = useMemo(() =>
+    (allProfiles ?? []).map((p) => {
+      const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
+      return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
+    }),
+    [allProfiles, myProfile]
+  );
 
-  // Filter
-  const filtered = activeFilter === "All"
-    ? matchedProfiles
-    : matchedProfiles.filter((p) => p.member_types.includes(FILTER_TO_TYPE[activeFilter] ?? ""));
+  // Filter + sort — memoized
+  const visible = useMemo(() => {
+    const filtered = activeFilter === "All"
+      ? matchedProfiles
+      : matchedProfiles.filter((p) => p.member_types.includes(FILTER_TO_TYPE[activeFilter] ?? ""));
 
-  // Sort
-  const sorted = [...filtered].sort((a, b) => {
-    if (sortBy === "best") return b.matchPercent - a.matchPercent;
-    return 0;
-  });
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === "best") return b.matchPercent - a.matchPercent;
+      if (sortBy === "recent") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (sortBy === "active") {
+        const aTime = a.last_seen_at ? new Date(a.last_seen_at).getTime() : 0;
+        const bTime = b.last_seen_at ? new Date(b.last_seen_at).getTime() : 0;
+        return bTime - aTime;
+      }
+      return 0;
+    });
 
-  const visible = sorted.slice(0, visibleCount);
+    return sorted.slice(0, visibleCount);
+  }, [matchedProfiles, activeFilter, sortBy, visibleCount]);
 
   const { data: activeNowUsers, isLoading: activeLoading } = useActiveNow();
 
@@ -77,11 +87,12 @@ const ForYou = () => {
               </p>
 
               {/* Filter pills */}
-              <div className="flex items-center gap-3 mb-4 overflow-x-auto pb-2">
+              <div className="flex items-center gap-3 mb-4 overflow-x-auto pb-2" role="group" aria-label="Filter by member type">
                 {FILTER_PILLS.map((pill) => (
                   <button
                     key={pill}
                     onClick={() => setActiveFilter(pill)}
+                    aria-pressed={activeFilter === pill}
                     className={`whitespace-nowrap px-4 py-2 font-mono text-xs uppercase tracking-wider border-2 transition-all ${
                       activeFilter === pill
                         ? "border-foreground bg-foreground text-primary-foreground shadow-brutal-sm"
@@ -114,8 +125,19 @@ const ForYou = () => {
                   ))}
                 </div>
               ) : visible.length === 0 ? (
-                <div className="border-2 border-foreground bg-card p-8 text-center font-mono text-sm text-muted-foreground shadow-brutal">
-                  No matches found yet. More people are joining every day!
+                <div className="border-2 border-foreground bg-card p-8 text-center shadow-brutal space-y-3">
+                  <Users className="h-10 w-10 mx-auto text-muted-foreground" />
+                  <p className="font-mono text-sm text-muted-foreground">
+                    {activeFilter !== "All"
+                      ? `No ${activeFilter} members found. Try a different filter!`
+                      : "No matches found yet. More people are joining every day!"}
+                  </p>
+                  {activeFilter !== "All" && (
+                    <Button variant="outline" size="sm" onClick={() => setActiveFilter("All")}
+                      className="border-2 border-foreground font-mono text-xs uppercase tracking-wider">
+                      Show All
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="grid gap-6 md:grid-cols-2">
@@ -138,7 +160,7 @@ const ForYou = () => {
               )}
 
               {/* Load more */}
-              {visibleCount < sorted.length && (
+              {visibleCount < matchedProfiles.length && (
                 <div className="mt-8">
                   <Button
                     variant="outline"

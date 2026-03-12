@@ -76,6 +76,8 @@ const Navbar = () => {
               size="icon"
               className="md:hidden border-2 border-transparent hover:border-foreground"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-expanded={mobileOpen}
+              aria-label="Navigation menu"
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>

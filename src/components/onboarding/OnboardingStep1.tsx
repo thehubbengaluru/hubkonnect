@@ -46,11 +46,17 @@ const OnboardingStep1 = ({ data, updateData, onNext, onSkip }: Props) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
 
-  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) return;
-    updateData({ photoFile: file, photoPreview: URL.createObjectURL(file) });
+    try {
+      const { resizeImage } = await import("@/lib/utils");
+      const resized = await resizeImage(file, 500);
+      updateData({ photoFile: resized, photoPreview: URL.createObjectURL(resized) });
+    } catch {
+      updateData({ photoFile: file, photoPreview: URL.createObjectURL(file) });
+    }
   };
 
   const bioLength = data.bio.length;

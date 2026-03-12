@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude_ai_Supabase__list_tables",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(npx vite:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx skills:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(python -c \":*)",
+      "Bash(pip install:*)",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "Bash(npm install:*)",
+      "Bash(npx playwright:*)"
+    ]
+  }
+}

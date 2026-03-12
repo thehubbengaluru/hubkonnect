@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { ArrowRight, Sparkles, Check, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -120,4 +120,4 @@ const ProfileCard = ({ id, name, handle, bio, matchPercent, skills, matchReason,
   );
 };
 
-export default ProfileCard;
+export default memo(ProfileCard);

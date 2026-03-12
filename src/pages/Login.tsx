@@ -4,7 +4,6 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import ConcentricCircles from "@/components/ConcentricCircles";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,7 +12,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { toast } = useToast();
@@ -91,22 +89,14 @@ const Login = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={remember}
-                  onCheckedChange={(c) => setRemember(c === true)}
-                  className="border-2 border-foreground data-[state=checked]:bg-accent data-[state=checked]:border-accent"
-                />
-                <label htmlFor="remember" className="font-mono text-xs cursor-pointer">Remember me</label>
-              </div>
+            <div className="flex items-center justify-end">
               <button
                 type="button"
                 onClick={async () => {

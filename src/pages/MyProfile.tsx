@@ -1,9 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Camera, Search, X, Plus, Check, Sparkles, Instagram, Linkedin,
   Handshake, Lightbulb, Briefcase, Heart, MessageCircle, Rocket, GraduationCap,
   Home, CalendarDays, Trash2, Eye, Pencil,
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMyProfileDetails } from "@/hooks/use-profiles";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 
 const MEMBER_TYPES = [
   { id: "co_living", label: "Co-living", icon: Home },
@@ -189,9 +191,11 @@ const MyProfile = () => {
   const { toast } = useToast();
   const { user, refreshProfile } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const fileRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<"preview" | "edit">("preview");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteText, setDeleteText] = useState("");
@@ -235,11 +239,18 @@ const MyProfile = () => {
     }
   };
 
-  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || file.size > 5 * 1024 * 1024) return;
-    setPhotoFile(file);
-    update({ photoPreview: URL.createObjectURL(file) });
+    try {
+      const { resizeImage } = await import("@/lib/utils");
+      const resized = await resizeImage(file, 500);
+      setPhotoFile(resized);
+      update({ photoPreview: URL.createObjectURL(resized) });
+    } catch {
+      setPhotoFile(file);
+      update({ photoPreview: URL.createObjectURL(file) });
+    }
   };
 
   const handleSave = async () => {
@@ -319,12 +330,43 @@ const MyProfile = () => {
   const bioLength = profile.bio.length;
   const bioColor = bioLength > 150 ? "text-destructive" : bioLength > 140 ? "text-accent" : "text-muted-foreground";
 
+  const { completeness, missing } = useMemo(() => {
+    const checks = [
+      { done: !!profile.fullName.trim(), label: "Full name" },
+      { done: !!profile.bio.trim(), label: "Bio" },
+      { done: !!profile.photoPreview, label: "Profile photo" },
+      { done: profile.memberTypes.length > 0, label: "Member type" },
+      { done: profile.skills.length >= 3, label: "At least 3 skills" },
+      { done: profile.interests.length >= 3, label: "At least 3 interests" },
+      { done: profile.lookingFor.length > 0, label: "Looking for" },
+      { done: !!(profile.instagram || profile.linkedin), label: "Social link" },
+    ];
+    const done = checks.filter((c) => c.done).length;
+    return { completeness: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.done).map((c) => c.label) };
+  }, [profile]);
+
   return (
     <PageShell>
       <div className="container max-w-3xl py-8">
         <h1 className="font-heading text-3xl md:text-4xl uppercase mb-4">
           {mode === "preview" ? "My Profile" : "Edit Profile"}
         </h1>
+
+        {/* Profile completeness */}
+        {completeness < 100 && (
+          <div className="border-2 border-foreground bg-card p-4 shadow-brutal mb-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-xs font-bold uppercase tracking-wider">Profile Completeness</p>
+              <span className="font-mono text-sm font-bold">{completeness}%</span>
+            </div>
+            <Progress value={completeness} className="h-2 border border-foreground" />
+            {missing.length > 0 && (
+              <p className="font-mono text-[10px] text-muted-foreground">
+                Missing: {missing.join(", ")}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Privacy toggle */}
         <div className="flex border-2 border-foreground mb-4 bg-card">
@@ -610,9 +652,20 @@ const MyProfile = () => {
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
                   className="flex-1 h-10 border-2 border-foreground font-mono text-xs uppercase">Cancel</Button>
-                <Button disabled={deleteText !== "DELETE"} onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
+                <Button disabled={deleteText !== "DELETE" || deleting} onClick={async () => {
+                    setDeleting(true);
+                    try {
+                      const { error } = await supabase.rpc("delete_own_account");
+                      if (error) throw error;
+                      await supabase.auth.signOut();
+                      navigate("/");
+                    } catch (err: any) {
+                      toast({ title: "Error", description: err.message || "Failed to delete account", variant: "destructive" });
+                      setDeleting(false);
+                    }
+                  }}
                   className="flex-1 h-10 border-2 border-destructive bg-destructive text-destructive-foreground font-mono text-xs uppercase hover:bg-destructive/90">
-                  Delete My Account
+                  {deleting ? "Deleting..." : "Delete My Account"}
                 </Button>
               </div>
             </div>

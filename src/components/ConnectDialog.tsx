@@ -37,7 +37,7 @@ const ConnectDialog = ({ open, onOpenChange, targetName, onSend, loading }: Conn
             maxLength={200}
             className="border-2 border-foreground bg-background font-mono text-sm min-h-[100px] resize-none"
           />
-          <p className="font-mono text-[10px] text-muted-foreground text-right">{message.length}/200</p>
+          <p className={`font-mono text-[10px] text-right ${message.length >= 180 ? "text-destructive font-bold" : "text-muted-foreground"}`}>{message.length}/200</p>
         </div>
         <DialogFooter className="p-6 pt-2 gap-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="font-mono text-xs uppercase">

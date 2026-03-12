@@ -18,43 +18,45 @@ export interface ConnectionRow {
   };
 }
 
+const CONNECTION_LIMIT = 100;
+
 export function useConnections(userId: string | undefined) {
   return useQuery({
     queryKey: ["connections", userId],
     queryFn: async () => {
       if (!userId) return { pending: [], sent: [], accepted: [] };
 
-      // Fetch connections where user is receiver (pending incoming)
-      const { data: incoming } = await supabase
-        .from("connections")
-        .select("*, profile:profiles!connections_requester_id_fkey(id, full_name, bio, avatar_url, instagram)")
-        .eq("receiver_id", userId)
-        .eq("status", "pending");
-
-      // Fetch connections where user is requester (sent)
-      const { data: sent } = await supabase
-        .from("connections")
-        .select("*, profile:profiles!connections_receiver_id_fkey(id, full_name, bio, avatar_url, instagram)")
-        .eq("requester_id", userId)
-        .eq("status", "pending");
-
-      // Fetch accepted connections (either side)
-      const { data: acceptedReq } = await supabase
-        .from("connections")
-        .select("*, profile:profiles!connections_receiver_id_fkey(id, full_name, bio, avatar_url, instagram)")
-        .eq("requester_id", userId)
-        .eq("status", "accepted");
-
-      const { data: acceptedRec } = await supabase
-        .from("connections")
-        .select("*, profile:profiles!connections_requester_id_fkey(id, full_name, bio, avatar_url, instagram)")
-        .eq("receiver_id", userId)
-        .eq("status", "accepted");
+      const [incoming, sent, acceptedReq, acceptedRec] = await Promise.all([
+        supabase
+          .from("connections")
+          .select("id, requester_id, receiver_id, status, message, created_at, updated_at, profile:profiles!connections_requester_id_fkey(id, full_name, bio, avatar_url, instagram)")
+          .eq("receiver_id", userId)
+          .eq("status", "pending")
+          .limit(CONNECTION_LIMIT),
+        supabase
+          .from("connections")
+          .select("id, requester_id, receiver_id, status, message, created_at, updated_at, profile:profiles!connections_receiver_id_fkey(id, full_name, bio, avatar_url, instagram)")
+          .eq("requester_id", userId)
+          .eq("status", "pending")
+          .limit(CONNECTION_LIMIT),
+        supabase
+          .from("connections")
+          .select("id, requester_id, receiver_id, status, message, created_at, updated_at, profile:profiles!connections_receiver_id_fkey(id, full_name, bio, avatar_url, instagram)")
+          .eq("requester_id", userId)
+          .eq("status", "accepted")
+          .limit(CONNECTION_LIMIT),
+        supabase
+          .from("connections")
+          .select("id, requester_id, receiver_id, status, message, created_at, updated_at, profile:profiles!connections_requester_id_fkey(id, full_name, bio, avatar_url, instagram)")
+          .eq("receiver_id", userId)
+          .eq("status", "accepted")
+          .limit(CONNECTION_LIMIT),
+      ]);
 
       return {
-        pending: (incoming ?? []) as ConnectionRow[],
-        sent: (sent ?? []) as ConnectionRow[],
-        accepted: [...(acceptedReq ?? []), ...(acceptedRec ?? [])] as ConnectionRow[],
+        pending: (incoming.data ?? []) as ConnectionRow[],
+        sent: (sent.data ?? []) as ConnectionRow[],
+        accepted: [...(acceptedReq.data ?? []), ...(acceptedRec.data ?? [])] as ConnectionRow[],
       };
     },
     enabled: !!userId,
@@ -104,6 +106,21 @@ export function useCancelConnection() {
   });
 }
 
+export function useRemoveConnection() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (connectionId: string) => {
+      const { error } = await supabase.rpc("remove_connection", { connection_id: connectionId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["connections"] });
+      qc.invalidateQueries({ queryKey: ["my-connections-list"] });
+      qc.invalidateQueries({ queryKey: ["connection-status"] });
+    },
+  });
+}
+
 export function useSendConnection() {
   const qc = useQueryClient();
   return useMutation({
@@ -137,7 +154,6 @@ export function useConnectionStatus(userId: string | undefined, otherUserId: str
   });
 }
 
-/** Fetch all connection rows for a user (lightweight, for status lookups) */
 export function useMyConnectionsList(userId: string | undefined) {
   return useQuery({
     queryKey: ["my-connections-list", userId],
@@ -146,7 +162,8 @@ export function useMyConnectionsList(userId: string | undefined) {
       const { data } = await supabase
         .from("connections")
         .select("id, requester_id, receiver_id, status")
-        .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
+        .or(`requester_id.eq.${userId},receiver_id.eq.${userId}`)
+        .limit(500);
       return data ?? [];
     },
     enabled: !!userId,

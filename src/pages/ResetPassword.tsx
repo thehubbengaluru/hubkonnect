@@ -38,8 +38,12 @@ const ResetPassword = () => {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("Password must contain uppercase, lowercase, and a number.");
       return;
     }
     if (password !== confirmPassword) {
@@ -96,6 +100,18 @@ const ResetPassword = () => {
                 placeholder="••••••••"
                 className="border-2 border-foreground bg-background font-mono h-12"
               />
+              {password.length > 0 && (
+                <div className="space-y-1 pt-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${password.length >= 8 ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${password.length >= 8 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>At least 8 characters</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className={`h-1.5 w-1.5 rounded-full ${/[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) ? "bg-green-500" : "bg-muted-foreground/30"}`} />
+                    <span className={`font-mono text-[11px] ${/[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>Uppercase, lowercase, and a number</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -105,8 +121,14 @@ const ResetPassword = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="border-2 border-foreground bg-background font-mono h-12"
+                className={`border-2 bg-background font-mono h-12 ${confirmPassword && password !== confirmPassword ? "border-destructive" : "border-foreground"}`}
               />
+              {confirmPassword && password !== confirmPassword && (
+                <p className="font-mono text-xs text-destructive">Passwords do not match</p>
+              )}
+              {confirmPassword && password === confirmPassword && confirmPassword.length > 0 && (
+                <p className="font-mono text-xs text-green-600 dark:text-green-400">Passwords match</p>
+              )}
             </div>
 
             <Button

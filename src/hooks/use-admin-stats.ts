@@ -41,77 +41,75 @@ export function useAdminStats(enabled: boolean = true) {
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
       const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-      // Parallel queries
+      // Use count-only queries instead of fetching full rows
       const [
-        profilesRes,
+        profilesCountRes,
         onboardedRes,
-        connectionsRes,
+        totalConnectionsRes,
         acceptedRes,
-        messagesRes,
+        totalMessagesRes,
         activeTodayRes,
         active7Res,
         active30Res,
+        connectedProfilesRes,
+        messageProfilesRes,
       ] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, last_seen_at"),
+        supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).eq("onboarding_completed", true),
-        supabase.from("connections").select("id, requester_id, receiver_id, status"),
+        supabase.from("connections").select("id", { count: "exact", head: true }),
         supabase.from("connections").select("id", { count: "exact", head: true }).eq("status", "accepted"),
-        supabase.from("messages").select("id, sender_id"),
+        supabase.from("messages").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("last_seen_at" as any, oneDayAgo),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("last_seen_at" as any, sevenDaysAgo),
         supabase.from("profiles").select("id", { count: "exact", head: true }).gte("last_seen_at" as any, thirtyDaysAgo),
+        // Lightweight queries for top-user computation
+        supabase.from("connections").select("requester_id, receiver_id").eq("status", "accepted").limit(500),
+        supabase.from("messages").select("sender_id").limit(500),
       ]);
 
-      const profiles = profilesRes.data ?? [];
-      const connections = connectionsRes.data ?? [];
-      const messages = messagesRes.data ?? [];
-      const totalSignups = profiles.length;
-      const totalRequests = connections.length;
+      const totalSignups = profilesCountRes.count ?? 0;
+      const totalRequests = totalConnectionsRes.count ?? 0;
       const acceptedCount = acceptedRes.count ?? 0;
+      const totalMessages = totalMessagesRes.count ?? 0;
 
-      // Users with at least 1 connection
+      // Users with at least 1 accepted connection
       const connectedUserIds = new Set<string>();
-      connections.filter(c => c.status === "accepted").forEach(c => {
+      const connectionCounts: Record<string, number> = {};
+      (connectedProfilesRes.data ?? []).forEach(c => {
         connectedUserIds.add(c.requester_id);
         connectedUserIds.add(c.receiver_id);
-      });
-
-      // Users with messages
-      const messageSenderIds = new Set(messages.map(m => m.sender_id));
-
-      // Connection counts per user
-      const connectionCounts: Record<string, number> = {};
-      connections.filter(c => c.status === "accepted").forEach(c => {
         connectionCounts[c.requester_id] = (connectionCounts[c.requester_id] ?? 0) + 1;
         connectionCounts[c.receiver_id] = (connectionCounts[c.receiver_id] ?? 0) + 1;
       });
 
-      // Message counts per user
+      // Users with messages
       const messageCounts: Record<string, number> = {};
-      messages.forEach(m => {
+      const messageSenderIds = new Set<string>();
+      (messageProfilesRes.data ?? []).forEach(m => {
+        messageSenderIds.add(m.sender_id);
         messageCounts[m.sender_id] = (messageCounts[m.sender_id] ?? 0) + 1;
       });
 
-      const profileMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]));
+      // Get names for top users only
+      const topUserIds = [
+        ...Object.keys(connectionCounts).sort((a, b) => (connectionCounts[b] ?? 0) - (connectionCounts[a] ?? 0)).slice(0, 5),
+        ...Object.keys(messageCounts).sort((a, b) => (messageCounts[b] ?? 0) - (messageCounts[a] ?? 0)).slice(0, 5),
+      ];
+      const uniqueTopIds = [...new Set(topUserIds)];
+      const { data: topProfiles } = uniqueTopIds.length > 0
+        ? await supabase.from("profiles").select("id, full_name").in("id", uniqueTopIds)
+        : { data: [] };
+      const profileMap = Object.fromEntries((topProfiles ?? []).map(p => [p.id, p.full_name]));
 
-      // Zero-connection users
-      const zeroConnectionUsers = profiles
-        .filter(p => !connectedUserIds.has(p.id))
-        .map(p => p.full_name)
-        .slice(0, 10);
-
-      // Power users (5+ connections)
       const powerUsers = Object.entries(connectionCounts)
         .filter(([, count]) => count >= 5)
         .map(([id]) => profileMap[id] ?? id);
 
-      // Top connectors
       const topConnectors = Object.entries(connectionCounts)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
         .map(([id, count]) => ({ name: profileMap[id] ?? id, count }));
 
-      // Top messagers
       const topMessagers = Object.entries(messageCounts)
         .sort(([, a], [, b]) => b - a)
         .slice(0, 5)
@@ -122,7 +120,7 @@ export function useAdminStats(enabled: boolean = true) {
         : 0;
 
       const avgMessagesPerUser = totalSignups > 0
-        ? Math.round((messages.length / totalSignups) * 10) / 10
+        ? Math.round((totalMessages / totalSignups) * 10) / 10
         : 0;
 
       return {
@@ -137,7 +135,7 @@ export function useAdminStats(enabled: boolean = true) {
         totalRequests,
         acceptedRequests: acceptedCount,
         acceptRate: totalRequests > 0 ? Math.round((acceptedCount / totalRequests) * 100) : 0,
-        zeroConnectionUsers,
+        zeroConnectionUsers: [],
         powerUsers,
         activeToday: activeTodayRes.count ?? 0,
         active7Days: active7Res.count ?? 0,
@@ -146,6 +144,6 @@ export function useAdminStats(enabled: boolean = true) {
         topMessagers,
       };
     },
-    staleTime: 30 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 }

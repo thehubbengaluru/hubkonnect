@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import OnboardingStep1 from "@/components/onboarding/OnboardingStep1";
 import OnboardingStep2 from "@/components/onboarding/OnboardingStep2";
@@ -33,8 +33,21 @@ const NUDGES = [
   "Let's go! Finish strong! 🎯",
 ];
 
+const ONBOARDING_STORAGE_KEY = "hubkonnect_onboarding_draft";
+
+const loadDraft = (): { step: number; data: Partial<OnboardingData> } | null => {
+  try {
+    const raw = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
 const Onboarding = () => {
-  const [step, setStep] = useState(1);
+  const draft = loadDraft();
+  const [step, setStep] = useState(draft?.step ?? 1);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [showComplete, setShowComplete] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -43,23 +56,29 @@ const Onboarding = () => {
   const navigate = useNavigate();
 
   const [data, setData] = useState<OnboardingData>({
-    fullName: "",
-    bio: "",
-    instagram: "",
-    linkedin: "",
+    fullName: draft?.data?.fullName ?? "",
+    bio: draft?.data?.bio ?? "",
+    instagram: draft?.data?.instagram ?? "",
+    linkedin: draft?.data?.linkedin ?? "",
     photoFile: null,
-    photoPreview: "",
-    memberTypes: [],
-    skills: [],
-    interests: [],
-    lookingFor: [],
+    photoPreview: draft?.data?.photoPreview ?? "",
+    memberTypes: draft?.data?.memberTypes ?? [],
+    skills: draft?.data?.skills ?? [],
+    interests: draft?.data?.interests ?? [],
+    lookingFor: draft?.data?.lookingFor ?? [],
   });
 
   const stepLabels = ["Basics", "Type", "Skills", "Goals"];
 
-  const updateData = (partial: Partial<OnboardingData>) => {
+  // Save draft to localStorage on every change
+  useEffect(() => {
+    const { photoFile, ...serializable } = data;
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify({ step, data: serializable }));
+  }, [data, step]);
+
+  const updateData = useCallback((partial: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...partial }));
-  };
+  }, []);
 
   const goTo = (target: number) => {
     setDirection(target > step ? "forward" : "back");
@@ -83,7 +102,7 @@ const Onboarding = () => {
         avatarUrl = urlData.publicUrl;
       }
 
-      const { error: profileErr } = await (supabase as any)
+      const { error: profileErr } = await supabase
         .from("profiles")
         .update({
           full_name: data.fullName,
@@ -118,6 +137,7 @@ const Onboarding = () => {
       ]);
 
       await refreshProfile();
+      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
       setShowComplete(true);
     } catch (err: any) {
       console.error("Onboarding save error:", err);
