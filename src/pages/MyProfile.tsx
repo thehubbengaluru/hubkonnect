@@ -316,17 +316,6 @@ const MyProfile = () => {
     setPhotoFile(null);
   };
 
-  if (isLoading) {
-    return (
-      <PageShell>
-        <div className="container max-w-3xl py-8 space-y-4">
-          <Skeleton className="h-10 w-48" />
-          <Skeleton className="h-64 border-2 border-foreground" />
-        </div>
-      </PageShell>
-    );
-  }
-
   const bioLength = profile.bio.length;
   const bioColor = bioLength > 150 ? "text-destructive" : bioLength > 140 ? "text-accent" : "text-muted-foreground";
 
@@ -344,6 +333,17 @@ const MyProfile = () => {
     const done = checks.filter((c) => c.done).length;
     return { completeness: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.done).map((c) => c.label) };
   }, [profile]);
+
+  if (isLoading) {
+    return (
+      <PageShell>
+        <div className="container max-w-3xl py-8 space-y-4">
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-64 border-2 border-foreground" />
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>

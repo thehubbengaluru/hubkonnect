@@ -61,6 +61,9 @@ test.describe("Connections page", () => {
 
   test.describe("With data", () => {
     test.beforeEach(async ({ page }) => {
+      // Track request count per pattern to handle the 4 parallel queries
+      let acceptedCallCount = 0;
+
       await page.route("**/rest/v1/connections*", async (route) => {
         const url = route.request().url();
         const method = route.request().method();
@@ -70,8 +73,15 @@ test.describe("Connections page", () => {
           return;
         }
 
-        // Pending (incoming) requests - receiver_id = me, status = pending
-        if (url.includes("receiver_id") && url.includes("pending")) {
+        // The hook fires 4 parallel queries using .eq() filters:
+        // 1) receiver_id=eq.test-user-id & status=eq.pending (incoming)
+        // 2) requester_id=eq.test-user-id & status=eq.pending (sent)
+        // 3) requester_id=eq.test-user-id & status=eq.accepted
+        // 4) receiver_id=eq.test-user-id & status=eq.accepted
+        // Note: use "=eq." patterns to distinguish filter params from select column names
+
+        // Pending incoming: receiver_id=eq.test-user-id & status=eq.pending
+        if (url.includes("receiver_id=eq.") && url.includes("status=eq.pending")) {
           await route.fulfill({
             status: 200,
             contentType: "application/json",
@@ -97,8 +107,8 @@ test.describe("Connections page", () => {
           return;
         }
 
-        // Sent (outgoing) requests - requester_id = me, status = pending
-        if (url.includes("requester_id") && url.includes("pending")) {
+        // Pending sent: requester_id=eq.test-user-id & status=eq.pending
+        if (url.includes("requester_id=eq.") && url.includes("status=eq.pending")) {
           await route.fulfill({
             status: 200,
             contentType: "application/json",
@@ -124,30 +134,41 @@ test.describe("Connections page", () => {
           return;
         }
 
-        // Accepted connections
-        if (url.includes("accepted")) {
-          await route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify([
-              {
-                id: "conn-3",
-                requester_id: "user-c",
-                receiver_id: "test-user-id",
-                status: "accepted",
-                message: "",
-                created_at: "2025-11-01T00:00:00Z",
-                updated_at: "2025-11-15T00:00:00Z",
-                profile: {
-                  id: "user-c",
-                  full_name: "Charlie Connected",
-                  bio: "Connected user",
-                  avatar_url: "",
-                  instagram: "",
+        // Accepted connections — only return data from one of the two queries to avoid duplication
+        if (url.includes("status=eq.accepted")) {
+          acceptedCallCount++;
+          if (acceptedCallCount % 2 === 1) {
+            // First accepted query (requester_id=me) - return the connection
+            await route.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify([
+                {
+                  id: "conn-3",
+                  requester_id: "user-c",
+                  receiver_id: "test-user-id",
+                  status: "accepted",
+                  message: "",
+                  created_at: "2025-11-01T00:00:00Z",
+                  updated_at: "2025-11-15T00:00:00Z",
+                  profile: {
+                    id: "user-c",
+                    full_name: "Charlie Connected",
+                    bio: "Connected user",
+                    avatar_url: "",
+                    instagram: "",
+                  },
                 },
-              },
-            ]),
-          });
+              ]),
+            });
+          } else {
+            // Second accepted query (receiver_id=me) - return empty to avoid duplicate
+            await route.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify([]),
+            });
+          }
           return;
         }
 
@@ -182,7 +203,7 @@ test.describe("Connections page", () => {
       await page.goto("/connections");
       await page.getByRole("tab", { name: /connections/i }).click();
       await expect(page.getByText("Charlie Connected")).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByRole("button", { name: /message/i })).toBeVisible();
+      await expect(page.getByRole("button", { name: /^message$/i })).toBeVisible();
     });
 
     test("search filters connections", async ({ page }) => {

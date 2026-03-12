@@ -14,7 +14,8 @@ test.describe("Profile pages", () => {
 
     test("renders profile page with user info", async ({ page }) => {
       await page.goto("/profile");
-      await expect(page.getByText("Test User")).toBeVisible({ timeout: 15_000 });
+      // Wait for the profile to fully load — the name appears in a heading
+      await expect(page.getByRole("heading", { name: /test user/i })).toBeVisible({ timeout: 20_000 });
     });
 
     test("page loads without crashing", async ({ page }) => {
@@ -91,7 +92,7 @@ test.describe("Profile pages", () => {
 
     test("renders other user profile", async ({ page }) => {
       await page.goto("/profile/other-user-id");
-      await expect(page.getByText("Other User")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByRole("heading", { name: /other user/i })).toBeVisible({ timeout: 20_000 });
     });
 
     test("shows connect button for non-connected users", async ({ page }) => {

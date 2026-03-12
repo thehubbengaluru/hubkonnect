@@ -56,7 +56,7 @@ test.describe("Password reset flow", () => {
     await page.getByText("Forgot password?").click();
 
     await expect(
-      page.getByText(/could not send reset email/i)
+      page.getByText(/could not send reset email/i).first()
     ).toBeVisible({ timeout: 5_000 });
   });
 });

@@ -22,9 +22,9 @@ test.describe("Onboarding flow", () => {
 
     // Step labels should be visible
     await expect(page.getByText("Basics")).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Type")).toBeVisible();
-    await expect(page.getByText("Skills")).toBeVisible();
-    await expect(page.getByText("Goals")).toBeVisible();
+    await expect(page.getByText("Type").first()).toBeVisible();
+    await expect(page.getByText("Skills").first()).toBeVisible();
+    await expect(page.getByText("Goals").first()).toBeVisible();
   });
 
   test("shows nudge text for step 1", async ({ page }) => {
@@ -36,7 +36,7 @@ test.describe("Onboarding flow", () => {
     await page.goto("/onboarding");
     const stepLabels = ["Basics", "Type", "Skills", "Goals"];
     for (const label of stepLabels) {
-      await expect(page.getByText(label)).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(label).first()).toBeVisible({ timeout: 15_000 });
     }
   });
 
