@@ -93,7 +93,7 @@ const ForYou = () => {
                     key={pill}
                     onClick={() => setActiveFilter(pill)}
                     aria-pressed={activeFilter === pill}
-                    className={`whitespace-nowrap px-4 py-2 font-mono text-xs uppercase tracking-wider border-2 transition-all ${
+                    className={`whitespace-nowrap px-4 py-3 min-h-[44px] sm:min-h-[36px] font-mono text-xs uppercase tracking-wider border-2 transition-all flex items-center justify-center ${
                       activeFilter === pill
                         ? "border-foreground bg-foreground text-primary-foreground shadow-brutal-sm"
                         : "border-foreground bg-background text-foreground hover:bg-accent hover:shadow-brutal-sm"
@@ -109,7 +109,7 @@ const ForYou = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider px-3 py-2 h-9 focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider px-3 py-2 h-11 sm:h-9 focus:outline-none focus:ring-2 focus:ring-accent"
                 >
                   <option value="best">Best Match</option>
                   <option value="recent">Recent</option>
@@ -134,7 +134,7 @@ const ForYou = () => {
                   </p>
                   {activeFilter !== "All" && (
                     <Button variant="outline" size="sm" onClick={() => setActiveFilter("All")}
-                      className="border-2 border-foreground font-mono text-xs uppercase tracking-wider">
+                      className="border-2 border-foreground font-mono text-xs uppercase tracking-wider min-h-[44px] sm:min-h-[36px] w-full sm:w-auto">
                       Show All
                     </Button>
                   )}

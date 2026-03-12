@@ -12,7 +12,7 @@ const PageShell = ({ children, hideNav = false }: PageShellProps) => {
   return (
     <div className="min-h-screen flex flex-col">
       {!hideNav && <Navbar />}
-      <main className={`flex-1 ${!hideNav ? "pt-16 pb-16 md:pb-0" : ""}`}>
+      <main className={`flex-1 ${!hideNav ? "pt-16 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0" : ""}`}>
         {children}
       </main>
     </div>

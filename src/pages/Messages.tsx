@@ -174,8 +174,8 @@ const Messages = () => {
               <>
                 {/* Chat header */}
                 <div className="p-3 border-b-2 border-foreground flex items-center gap-3">
-                  <button onClick={() => setSearchParams({})} className="md:hidden" aria-label="Back to conversations">
-                    <ArrowLeft className="h-5 w-5" />
+                  <button onClick={() => setSearchParams({})} className="md:hidden p-2 -ml-2 hover:bg-accent/20 transition-colors" aria-label="Back to conversations">
+                    <ArrowLeft className="h-6 w-6" />
                   </button>
                   <div className="h-8 w-8 border-2 border-foreground bg-accent flex items-center justify-center overflow-hidden">
                     {activeConv.partnerAvatar ? (
@@ -193,7 +193,7 @@ const Messages = () => {
                     <button
                       onClick={() => loadEarlier.mutate()}
                       disabled={loadEarlier.isPending}
-                      className="w-full text-center font-mono text-[11px] text-muted-foreground hover:text-foreground py-2 transition-colors"
+                      className="w-full text-center font-mono text-[11px] text-muted-foreground hover:text-foreground py-3 min-h-[44px] transition-colors"
                     >
                       {loadEarlier.isPending ? "Loading..." : "Load earlier messages"}
                     </button>
@@ -231,11 +231,11 @@ const Messages = () => {
                     value={newMsg}
                     onChange={(e) => { setNewMsg(e.target.value); sendTyping(); }}
                     placeholder="Type a message..."
-                    className="border-2 border-foreground bg-background font-mono text-sm h-10 flex-1"
+                    className="border-2 border-foreground bg-background font-mono text-sm h-12 md:h-10 flex-1"
                   />
                   <Button type="submit" disabled={!newMsg.trim() || sendMessage.isPending}
-                    className="h-10 px-4 border-2 border-foreground shadow-brutal-sm font-mono text-xs uppercase">
-                    <Send className="h-4 w-4" />
+                    className="h-12 md:h-10 px-4 md:px-5 border-2 border-foreground shadow-brutal-sm font-mono text-xs uppercase min-w-[56px] md:min-w-0">
+                    <Send className="h-5 md:h-4 w-5 md:w-4" />
                   </Button>
                 </form>
               </>

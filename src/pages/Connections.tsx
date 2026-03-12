@@ -72,13 +72,13 @@ const Connections = () => {
 
         <Tabs defaultValue="pending" className="w-full">
           <TabsList className="w-full justify-start bg-transparent border-b-2 border-foreground rounded-none p-0 h-auto gap-0 overflow-x-auto">
-            <TabsTrigger value="pending" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
+            <TabsTrigger value="pending" className="flex-1 sm:flex-none rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-6 py-4 whitespace-nowrap min-h-[48px]">
               Pending ({pending.length})
             </TabsTrigger>
-            <TabsTrigger value="sent" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
+            <TabsTrigger value="sent" className="flex-1 sm:flex-none rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-6 py-4 whitespace-nowrap min-h-[48px]">
               Sent ({sent.length})
             </TabsTrigger>
-            <TabsTrigger value="connections" className="rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[10px] sm:text-xs uppercase tracking-wider px-2.5 sm:px-4 py-3 whitespace-nowrap">
+            <TabsTrigger value="connections" className="flex-1 sm:flex-none rounded-none border-b-[3px] border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent data-[state=active]:shadow-none font-mono text-[11px] sm:text-xs uppercase tracking-wider px-3 sm:px-6 py-4 whitespace-nowrap min-h-[48px]">
               Connections ({accepted.length})
             </TabsTrigger>
           </TabsList>
@@ -116,18 +116,18 @@ const Connections = () => {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
                       <Button size="sm" onClick={() => handleAccept(req.id, req.profile.full_name)} disabled={acceptMut.isPending}
-                        className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider shadow-brutal-sm gap-1">
-                        <Check className="h-3.5 w-3.5" /> {acceptMut.isPending ? "Accepting..." : "Accept"}
+                        className="min-h-[44px] sm:min-h-[36px] px-3 sm:px-4 border-2 border-foreground font-mono text-[11px] sm:text-xs uppercase tracking-wider shadow-brutal-sm gap-1 flex-1 sm:flex-none">
+                        <Check className="h-4 w-4" /> {acceptMut.isPending ? "Accepting..." : "Accept"}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleDecline(req.id)} disabled={declineMut.isPending}
-                        className="h-8 sm:h-9 px-2.5 sm:px-4 font-mono text-[10px] sm:text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 gap-1">
-                        <X className="h-3.5 w-3.5" /> {declineMut.isPending ? "Declining..." : "Decline"}
+                        className="min-h-[44px] sm:min-h-[36px] px-3 sm:px-4 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 gap-1 flex-1 sm:flex-none">
+                        <X className="h-4 w-4" /> {declineMut.isPending ? "Declining..." : "Decline"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${req.profile.id}`)}
-                        className="h-8 sm:h-9 px-2.5 sm:px-4 border-2 border-foreground font-mono text-[10px] sm:text-xs uppercase tracking-wider gap-1">
-                        <Eye className="h-3.5 w-3.5" /> <span className="hidden sm:inline">View Profile</span><span className="sm:hidden">View</span>
+                        className="min-h-[44px] sm:min-h-[36px] px-3 sm:px-4 border-2 border-foreground font-mono text-[11px] sm:text-xs uppercase tracking-wider gap-1 w-full sm:w-auto mt-1 sm:mt-0">
+                        <Eye className="h-4 w-4" /> View Profile
                       </Button>
                     </div>
 
@@ -174,12 +174,12 @@ const Connections = () => {
                     )}
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm" onClick={() => handleCancel(req.id)} disabled={cancelMut.isPending}
-                        className="h-9 px-4 font-mono text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10">
+                        className="min-h-[44px] sm:min-h-[36px] px-4 font-mono text-[11px] sm:text-xs uppercase tracking-wider text-destructive hover:text-destructive hover:bg-destructive/10 flex-1 sm:flex-none">
                         {cancelMut.isPending ? "Cancelling..." : "Cancel Request"}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigate(`/profile/${req.profile.id}`)}
-                        className="h-9 px-4 border-2 border-foreground font-mono text-xs uppercase tracking-wider gap-1">
-                        <Eye className="h-3.5 w-3.5" /> View Profile
+                        className="min-h-[44px] sm:min-h-[36px] px-4 border-2 border-foreground font-mono text-[11px] sm:text-xs uppercase tracking-wider gap-1 flex-1 sm:flex-none">
+                        <Eye className="h-4 w-4" /> View Profile
                       </Button>
                     </div>
                   </div>
@@ -229,18 +229,18 @@ const Connections = () => {
                     </div>
                     <h3 className="font-heading text-sm uppercase">{conn.profile.full_name}</h3>
                     <p className="font-mono text-[10px] text-muted-foreground mt-2">Connected {timeAgo(conn.updated_at)}</p>
-                    <div className="mt-3 space-y-1.5">
+                    <div className="mt-3 space-y-2">
                       <Button size="sm" onClick={() => navigate(`/messages?chat=${conn.profile.id}`)}
-                        className="w-full h-8 border-2 border-foreground font-mono text-[10px] uppercase tracking-wider shadow-brutal-sm gap-1">
-                        <MessageCircle className="h-3 w-3" /> Message
+                        className="w-full min-h-[44px] sm:min-h-[36px] border-2 border-foreground font-mono text-[11px] sm:text-xs uppercase tracking-wider shadow-brutal-sm gap-1.5">
+                        <MessageCircle className="h-4 w-4" /> Message
                       </Button>
                       <button onClick={() => navigate(`/profile/${conn.profile.id}`)}
-                        className="w-full font-mono text-[10px] text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors py-1">
+                        className="w-full min-h-[44px] sm:min-h-[36px] font-mono text-[11px] sm:text-xs text-muted-foreground border-2 border-transparent hover:border-foreground hover:bg-accent hover:text-foreground transition-all flex items-center justify-center">
                         View Profile
                       </button>
                       <button onClick={() => handleRemove(conn.id, conn.profile.full_name)} disabled={removeMut.isPending}
-                        className="w-full font-mono text-[10px] text-destructive hover:text-destructive/80 transition-colors py-1 flex items-center justify-center gap-1">
-                        <UserMinus className="h-3 w-3" /> {removeMut.isPending ? "Removing..." : "Remove"}
+                        className="w-full min-h-[44px] sm:min-h-[36px] font-mono text-[11px] sm:text-xs text-destructive border-2 border-transparent hover:border-destructive hover:bg-destructive/10 transition-all flex items-center justify-center gap-1.5">
+                        <UserMinus className="h-4 w-4" /> {removeMut.isPending ? "Removing..." : "Remove Connection"}
                       </button>
                     </div>
                   </div>

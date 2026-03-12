@@ -119,12 +119,12 @@ const Index = () => {
 
           <div className="flex flex-col items-center gap-4 pt-4">
             <Link to="/signup">
-              <Button size="lg" className="gap-2 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider px-8 md:px-10 h-14 text-sm md:text-base">
+              <Button size="lg" className="gap-2 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider px-8 md:px-10 h-14 md:h-14 text-sm md:text-base">
                 Join the Beta — It's Free <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <span className="font-mono text-xs text-muted-foreground">Limited early access · No credit card required</span>
-            <Link to="/login" className="font-mono text-sm text-muted-foreground hover:text-foreground underline decoration-accent decoration-2 underline-offset-4 transition-colors">
+            <Link to="/login" className="font-mono text-sm text-muted-foreground hover:text-foreground underline decoration-accent decoration-2 underline-offset-4 transition-colors min-h-[44px] flex items-center">
               Already a member? Log in
             </Link>
           </div>
@@ -295,7 +295,7 @@ const Index = () => {
             Get your first curated matches in under 5 minutes — it's free for Hub members.
           </p>
           <Link to="/signup">
-            <Button size="lg" className="bg-accent text-accent-foreground border-2 border-accent shadow-brutal-accent hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all font-mono font-bold uppercase tracking-wider px-10 h-14 text-base mt-4">
+            <Button size="lg" className="bg-accent text-accent-foreground border-2 border-accent shadow-brutal-accent hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all font-mono font-bold uppercase tracking-wider px-10 h-14 text-xs md:text-base mt-4 w-full sm:w-auto">
               Join the Beta — It's Free
             </Button>
           </Link>

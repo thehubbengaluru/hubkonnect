@@ -77,7 +77,7 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder={`Search ${label.toLowerCase()}...`}
-          className="border-2 border-foreground bg-background font-mono text-xs h-10 pl-9" />
+          className="border-2 border-foreground bg-background font-mono text-xs h-12 md:h-10 pl-9" />
       </div>
 
       {selected.length > 0 && (
@@ -133,7 +133,7 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
                       const atLimit = selected.length >= max && !isSelected;
                       return (
                         <button key={item} type="button" onClick={() => !atLimit && onToggle(item)} disabled={atLimit}
-                          className={`px-2 py-1 text-[11px] font-mono border-2 transition-all ${
+                          className={`px-3 py-2 md:px-2 md:py-1 text-xs md:text-[11px] font-mono border-2 transition-all min-h-[44px] md:min-h-0 ${
                             isSelected ? "border-foreground bg-foreground text-primary-foreground"
                               : atLimit ? "border-muted text-muted-foreground opacity-50 cursor-not-allowed"
                               : "border-foreground bg-background hover:bg-accent"
@@ -151,22 +151,24 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
       )}
 
       {showCustom ? (
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input value={customInput} onChange={(e) => setCustomInput(e.target.value)}
             placeholder="Type custom..." maxLength={30}
-            className="border-2 border-foreground bg-background font-mono text-xs h-9"
+            className="border-2 border-foreground bg-background font-mono text-xs h-12 sm:h-9"
             onKeyDown={(e) => e.key === "Enter" && handleAddCustom()} />
-          <Button type="button" onClick={handleAddCustom} disabled={!customInput.trim()} size="sm"
-            className="h-9 border-2 border-foreground font-mono text-[10px] uppercase">Add</Button>
-          <Button type="button" variant="ghost" size="sm"
-            onClick={() => { setShowCustom(false); setCustomInput(""); }} className="h-9">
-            <X className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex gap-2">
+            <Button type="button" onClick={handleAddCustom} disabled={!customInput.trim()} size="sm"
+              className="h-12 sm:h-9 border-2 border-foreground font-mono text-[10px] uppercase flex-1">Add</Button>
+            <Button type="button" variant="ghost" size="sm"
+              onClick={() => { setShowCustom(false); setCustomInput(""); }} className="h-12 sm:h-9 px-4">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       ) : (
         <button type="button" onClick={() => setShowCustom(true)}
-          className="inline-flex items-center gap-1 font-mono text-[11px] text-muted-foreground underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground">
-          <Plus className="h-3 w-3" /> Add custom
+          className="inline-flex items-center justify-center gap-1.5 font-mono text-[12px] text-muted-foreground border-2 border-dashed border-muted-foreground p-3 w-full sm:w-auto sm:border-none sm:p-0 sm:justify-start hover:text-foreground">
+          <Plus className="h-4 w-4" /> Add custom tag
         </button>
       )}
     </div>
@@ -337,7 +339,7 @@ const MyProfile = () => {
   if (isLoading) {
     return (
       <PageShell>
-        <div className="container max-w-3xl py-8 space-y-4">
+        <div className="container max-w-3xl py-6 sm:py-8 px-4 sm:px-6 lg:px-0 space-y-4">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-64 border-2 border-foreground" />
         </div>
@@ -347,7 +349,7 @@ const MyProfile = () => {
 
   return (
     <PageShell>
-      <div className="container max-w-3xl py-8">
+      <div className="container max-w-3xl py-6 sm:py-8 px-4 sm:px-6 lg:px-0">
         <h1 className="font-heading text-3xl md:text-4xl uppercase mb-4">
           {mode === "preview" ? "My Profile" : "Edit Profile"}
         </h1>
@@ -372,7 +374,7 @@ const MyProfile = () => {
         <div className="flex border-2 border-foreground mb-4 bg-card">
           {PRIVACY_OPTIONS.map((opt) => (
             <button key={opt.id} onClick={() => update({ privacy: opt.id })}
-              className={`flex-1 py-2 sm:py-2.5 font-mono text-[9px] sm:text-[11px] uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 ${
+              className={`flex-1 min-h-[44px] py-2 sm:py-2.5 font-mono text-[9px] sm:text-[11px] uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 leading-tight ${
                 profile.privacy === opt.id ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
               }`}>
               {opt.label}
@@ -512,13 +514,13 @@ const MyProfile = () => {
                     <Camera className="h-8 w-8 text-muted-foreground" />
                   )}
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}
-                    className="border-2 border-foreground font-mono text-[10px] uppercase tracking-wider h-8">Change Photo</Button>
+                    className="border-2 border-foreground font-mono text-[10px] uppercase tracking-wider h-10 sm:h-8 w-full sm:w-auto">Change Photo</Button>
                   {profile.photoPreview && (
                     <Button type="button" variant="ghost" size="sm"
                       onClick={() => { update({ photoPreview: "" }); setPhotoFile(null); }}
-                      className="font-mono text-[10px] uppercase tracking-wider text-destructive hover:text-destructive h-8">Remove Photo</Button>
+                      className="font-mono text-[10px] uppercase tracking-wider text-destructive hover:text-destructive h-10 sm:h-8 w-full sm:w-auto">Remove Photo</Button>
                   )}
                 </div>
                 <input ref={fileRef} type="file" accept="image/png,image/jpeg" onChange={handlePhoto} className="hidden" />
@@ -614,13 +616,13 @@ const MyProfile = () => {
             </div>
 
             {/* Save / Cancel */}
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-4">
               <button type="button" onClick={handleCancel}
-                className="font-mono text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors">
+                className="font-mono text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors text-center sm:text-left">
                 Cancel Changes
               </button>
-            <Button onClick={handleSave} disabled={!hasChanges || saving}
-                className="h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm">
+              <Button onClick={handleSave} disabled={!hasChanges || saving}
+                className="w-full sm:w-auto h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm">
                 {saving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
@@ -632,8 +634,8 @@ const MyProfile = () => {
                 Once you delete your account, there is no going back. All your data will be permanently deleted.
               </p>
               <Button variant="outline" onClick={() => setShowDeleteModal(true)}
-                className="border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-mono text-xs uppercase tracking-wider h-10">
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete My Account
+                className="border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-mono text-xs uppercase tracking-wider h-12 md:h-10 w-full sm:w-auto">
+                <Trash2 className="h-4 w-4 mr-2" /> Delete My Account
               </Button>
             </div>
           </div>
@@ -647,12 +649,12 @@ const MyProfile = () => {
               <p className="font-mono text-xs text-muted-foreground">
                 This action cannot be undone. Type <strong>DELETE</strong> to confirm.
               </p>
-              <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)}
-                placeholder="Type DELETE" className="border-2 border-foreground bg-background font-mono h-10" />
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
-                  className="flex-1 h-10 border-2 border-foreground font-mono text-xs uppercase">Cancel</Button>
-                <Button disabled={deleteText !== "DELETE" || deleting} onClick={async () => {
+                <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)}
+                  placeholder="Type DELETE" className="border-2 border-foreground bg-background font-mono h-12 md:h-10 text-base" />
+                <div className="flex flex-col-reverse sm:flex-row gap-3 mt-2">
+                  <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
+                    className="flex-1 min-h-[48px] border-2 border-foreground font-mono text-xs uppercase">Cancel</Button>
+                  <Button disabled={deleteText !== "DELETE" || deleting} onClick={async () => {
                     setDeleting(true);
                     try {
                       const { error } = await supabase.rpc("delete_own_account");

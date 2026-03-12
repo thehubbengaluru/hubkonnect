@@ -111,7 +111,7 @@ const Navbar = () => {
       </header>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-foreground">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t-2 border-foreground pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around py-2">
           {navItems.map(({ to, label, icon: Icon }) => {
             const active = location.pathname === to;
@@ -119,7 +119,7 @@ const Navbar = () => {
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center gap-0.5 px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+                className={`flex flex-col items-center gap-1 min-h-[48px] justify-center px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
                   active ? "text-accent" : "text-muted-foreground"
                 }`}
               >
