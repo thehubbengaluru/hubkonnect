@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
-  Camera, Search, X, Plus, Check, Sparkles, Instagram, Linkedin,
+  Camera, Search, X, Plus, Check, Instagram, Linkedin,
   Handshake, Lightbulb, Briefcase, Heart, MessageCircle, Rocket, GraduationCap,
-  Home, CalendarDays, Trash2, Eye, Pencil,
+  Home, CalendarDays, Trash2, Eye, Pencil, Copy, Check as CheckIcon,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import { useMyProfileDetails } from "@/hooks/use-profiles";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+
+const BIO_MAX = 160;
 
 const MEMBER_TYPES = [
   { id: "co_living", label: "Co-living", icon: Home },
@@ -68,9 +70,9 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
     <div className="border-2 border-foreground bg-card p-5 shadow-brutal space-y-4">
       <div className="flex items-center justify-between">
         <Label className="font-mono text-xs font-bold uppercase tracking-wider">
-          {label} (Select {min}-{max})
+          {label} (Select {min}–{max})
         </Label>
-        <span className="font-mono text-[11px] text-muted-foreground">{selected.length}/{max}</span>
+        <span className="font-mono text-xs text-muted-foreground">{selected.length}/{max}</span>
       </div>
 
       <div className="relative">
@@ -82,10 +84,10 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
 
       {selected.length > 0 && (
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Selected ({selected.length}):</p>
+          <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">Selected ({selected.length}):</p>
           <div className="flex flex-wrap gap-1.5">
             {selected.map((item) => (
-              <span key={item} className="inline-flex items-center gap-1 px-2 py-1 text-[11px] font-mono bg-foreground text-primary-foreground border-2 border-foreground">
+              <span key={item} className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-foreground text-primary-foreground border-2 border-foreground">
                 {item}
                 <button type="button" onClick={() => onToggle(item)} className="hover:text-destructive ml-0.5">
                   <X className="h-3 w-3" />
@@ -103,7 +105,7 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
             const atLimit = selected.length >= max && !isSelected;
             return (
               <button key={item} type="button" onClick={() => !atLimit && onToggle(item)} disabled={atLimit}
-                className={`px-2 py-1 text-[11px] font-mono border-2 transition-all ${
+                className={`px-2 py-1 text-xs font-mono border-2 transition-all ${
                   isSelected ? "border-foreground bg-foreground text-primary-foreground"
                     : atLimit ? "border-muted text-muted-foreground opacity-50 cursor-not-allowed"
                     : "border-foreground bg-background hover:bg-accent"
@@ -126,14 +128,14 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
             <div className="space-y-3 pt-2">
               {Object.entries(categories).map(([cat, items]) => (
                 <div key={cat}>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5">{cat}</p>
+                  <p className="font-mono text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1.5">{cat}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {items.map((item) => {
                       const isSelected = selected.includes(item);
                       const atLimit = selected.length >= max && !isSelected;
                       return (
                         <button key={item} type="button" onClick={() => !atLimit && onToggle(item)} disabled={atLimit}
-                          className={`px-3 py-2 md:px-2 md:py-1 text-xs md:text-[11px] font-mono border-2 transition-all min-h-[44px] md:min-h-0 ${
+                          className={`px-3 py-2 md:px-2 md:py-1 text-xs font-mono border-2 transition-all min-h-[44px] md:min-h-0 ${
                             isSelected ? "border-foreground bg-foreground text-primary-foreground"
                               : atLimit ? "border-muted text-muted-foreground opacity-50 cursor-not-allowed"
                               : "border-foreground bg-background hover:bg-accent"
@@ -153,12 +155,12 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
       {showCustom ? (
         <div className="flex flex-col sm:flex-row gap-2">
           <Input value={customInput} onChange={(e) => setCustomInput(e.target.value)}
-            placeholder="Type custom..." maxLength={30}
+            placeholder="Type custom tag..." maxLength={30}
             className="border-2 border-foreground bg-background font-mono text-xs h-12 sm:h-9"
             onKeyDown={(e) => e.key === "Enter" && handleAddCustom()} />
           <div className="flex gap-2">
             <Button type="button" onClick={handleAddCustom} disabled={!customInput.trim()} size="sm"
-              className="h-12 sm:h-9 border-2 border-foreground font-mono text-[10px] uppercase flex-1">Add</Button>
+              className="h-12 sm:h-9 border-2 border-foreground font-mono text-xs uppercase flex-1">Add</Button>
             <Button type="button" variant="ghost" size="sm"
               onClick={() => { setShowCustom(false); setCustomInput(""); }} className="h-12 sm:h-9 px-4">
               <X className="h-4 w-4" />
@@ -167,7 +169,7 @@ const TagPickerEdit = ({ label, categories, selected, onToggle, max, min }: TagP
         </div>
       ) : (
         <button type="button" onClick={() => setShowCustom(true)}
-          className="inline-flex items-center justify-center gap-1.5 font-mono text-[12px] text-muted-foreground border-2 border-dashed border-muted-foreground p-3 w-full sm:w-auto sm:border-none sm:p-0 sm:justify-start hover:text-foreground">
+          className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground border-2 border-dashed border-muted-foreground px-3 py-2 hover:text-foreground hover:border-foreground transition-colors">
           <Plus className="h-4 w-4" /> Add custom tag
         </button>
       )}
@@ -197,6 +199,14 @@ const MyProfile = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<"preview" | "edit">("preview");
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!user) return;
+    navigator.clipboard.writeText(`${window.location.origin}/profile/${user.id}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const [deleting, setDeleting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -305,7 +315,7 @@ const MyProfile = () => {
       const updated = { ...profile, photoPreview: avatarUrl };
       setProfile(updated);
       setSavedProfile(updated);
-      toast({ title: "🎉 Profile updated!", description: "Your changes have been saved.", duration: 3000 });
+      toast({ title: "Profile updated!", description: "Your changes have been saved.", duration: 3000 });
     } catch (err: any) {
       toast({ title: "Error saving", description: err.message, variant: "destructive" });
     } finally {
@@ -319,7 +329,7 @@ const MyProfile = () => {
   };
 
   const bioLength = profile.bio.length;
-  const bioColor = bioLength > 150 ? "text-destructive" : bioLength > 140 ? "text-accent" : "text-muted-foreground";
+  const bioColor = bioLength > BIO_MAX ? "text-destructive" : bioLength > BIO_MAX - 20 ? "text-accent" : "text-muted-foreground";
 
   const { completeness, missing } = useMemo(() => {
     const checks = [
@@ -350,48 +360,20 @@ const MyProfile = () => {
   return (
     <PageShell>
       <div className="container max-w-3xl py-6 sm:py-8 px-4 sm:px-6 lg:px-0">
-        <h1 className="font-heading text-3xl md:text-4xl uppercase mb-4">
+        <h1 className="font-heading text-3xl md:text-4xl uppercase mb-6">
           {mode === "preview" ? "My Profile" : "Edit Profile"}
         </h1>
 
-        {/* Profile completeness */}
-        {completeness < 100 && (
-          <div className="border-2 border-foreground bg-card p-4 shadow-brutal mb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="font-mono text-xs font-bold uppercase tracking-wider">Profile Completeness</p>
-              <span className="font-mono text-sm font-bold">{completeness}%</span>
-            </div>
-            <Progress value={completeness} className="h-2 border border-foreground" />
-            {missing.length > 0 && (
-              <p className="font-mono text-[10px] text-muted-foreground">
-                Missing: {missing.join(", ")}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Privacy toggle */}
-        <div className="flex border-2 border-foreground mb-4 bg-card">
-          {PRIVACY_OPTIONS.map((opt) => (
-            <button key={opt.id} onClick={() => update({ privacy: opt.id })}
-              className={`flex-1 min-h-[44px] py-2 sm:py-2.5 font-mono text-[9px] sm:text-[11px] uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 leading-tight ${
-                profile.privacy === opt.id ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
-              }`}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
         {/* Preview / Edit toggle */}
-        <div className="flex border-2 border-foreground mb-8 bg-card">
+        <div className="flex border-2 border-foreground mb-4 bg-card">
           <button onClick={() => setMode("preview")}
-            className={`flex-1 py-2 sm:py-2.5 font-mono text-[10px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 transition-all border-r-2 border-foreground ${
+            className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border-r-2 border-foreground ${
               mode === "preview" ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
             }`}>
             <Eye className="h-3.5 w-3.5" /> Preview
           </button>
           <button onClick={() => setMode("edit")}
-            className={`flex-1 py-2 sm:py-2.5 font-mono text-[10px] sm:text-xs uppercase tracking-wider flex items-center justify-center gap-1 sm:gap-1.5 transition-all ${
+            className={`flex-1 py-2.5 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all ${
               mode === "edit" ? "bg-foreground text-primary-foreground" : "bg-card text-muted-foreground hover:bg-accent/20"
             }`}>
             <Pencil className="h-3.5 w-3.5" /> Edit
@@ -410,7 +392,12 @@ const MyProfile = () => {
                 )}
               </div>
               <h2 className="font-heading text-2xl uppercase">{profile.fullName}</h2>
-              {profile.instagram && <p className="font-mono text-xs text-muted-foreground">{profile.instagram}</p>}
+              <button
+                onClick={handleCopyLink}
+                className="inline-flex items-center gap-1.5 font-mono text-xs border-2 border-foreground px-3 py-1.5 bg-background hover:bg-accent hover:shadow-brutal-sm transition-all"
+              >
+                {copied ? <><CheckIcon className="h-3.5 w-3.5" /> Copied!</> : <><Copy className="h-3.5 w-3.5" /> Copy profile link</>}
+              </button>
             </div>
 
             {profile.bio && (
@@ -438,7 +425,7 @@ const MyProfile = () => {
                   <h3 className="font-heading text-sm uppercase mb-3">Skills ({profile.skills.length})</h3>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.skills.map((s) => (
-                      <span key={s} className="inline-block font-mono text-[11px] px-2 py-1 border-2 border-foreground bg-foreground text-primary-foreground">{s}</span>
+                      <span key={s} className="inline-block font-mono text-xs px-2 py-1 border-2 border-foreground bg-foreground text-primary-foreground">{s}</span>
                     ))}
                   </div>
                 </div>
@@ -448,7 +435,7 @@ const MyProfile = () => {
                   <h3 className="font-heading text-sm uppercase mb-3">Interests ({profile.interests.length})</h3>
                   <div className="flex flex-wrap gap-1.5">
                     {profile.interests.map((i) => (
-                      <span key={i} className="inline-block font-mono text-[11px] px-2 py-1 border-2 border-accent bg-accent text-accent-foreground">{i}</span>
+                      <span key={i} className="inline-block font-mono text-xs px-2 py-1 border-2 border-accent bg-accent text-accent-foreground">{i}</span>
                     ))}
                   </div>
                 </div>
@@ -479,13 +466,15 @@ const MyProfile = () => {
                 <div className="flex gap-3">
                   {profile.instagram && (
                     <a href={`https://instagram.com/${profile.instagram.replace("@", "")}`} target="_blank" rel="noopener noreferrer"
-                      className="h-11 w-11 border-2 border-foreground flex items-center justify-center bg-background hover:bg-accent hover:shadow-brutal-sm transition-all">
+                      className="h-11 w-11 border-2 border-foreground flex items-center justify-center bg-background hover:bg-accent hover:shadow-brutal-sm transition-all"
+                      aria-label="Instagram profile">
                       <Instagram className="h-5 w-5" />
                     </a>
                   )}
                   {profile.linkedin && (
-                    <a href={`https://${profile.linkedin}`} target="_blank" rel="noopener noreferrer"
-                      className="h-11 w-11 border-2 border-foreground flex items-center justify-center bg-background hover:bg-accent hover:shadow-brutal-sm transition-all">
+                    <a href={profile.linkedin.startsWith("http") ? profile.linkedin : `https://${profile.linkedin}`} target="_blank" rel="noopener noreferrer"
+                      className="h-11 w-11 border-2 border-foreground flex items-center justify-center bg-background hover:bg-accent hover:shadow-brutal-sm transition-all"
+                      aria-label="LinkedIn profile">
                       <Linkedin className="h-5 w-5" />
                     </a>
                   )}
@@ -495,7 +484,7 @@ const MyProfile = () => {
 
             <Button onClick={() => setMode("edit")}
               className="w-full h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm gap-2">
-              <Pencil className="h-4 w-4" /> Switch to Edit Mode
+              <Pencil className="h-4 w-4" /> Edit Profile
             </Button>
           </div>
         )}
@@ -503,6 +492,55 @@ const MyProfile = () => {
         {/* ─── EDIT MODE ─── */}
         {mode === "edit" && (
           <div className="space-y-6">
+            {/* Profile completeness — only shown in edit mode */}
+            {completeness < 100 && (
+              <div className="border-2 border-foreground bg-card p-4 shadow-brutal space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="font-mono text-xs font-bold uppercase tracking-wider">Profile Completeness</p>
+                  <span className="font-mono text-sm font-bold">{completeness}%</span>
+                </div>
+                <Progress value={completeness} className="h-2 border border-foreground" />
+                {missing.length > 0 && (
+                  <p className="font-mono text-xs text-muted-foreground">
+                    Missing: {missing.join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Privacy setting — clearly separated with label */}
+            <div className="border-2 border-foreground bg-card p-4 shadow-brutal space-y-2">
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider block">Profile Visibility</Label>
+              <div className="flex border-2 border-foreground">
+                {PRIVACY_OPTIONS.map((opt) => (
+                  <button key={opt.id} onClick={() => update({ privacy: opt.id })}
+                    className={`flex-1 min-h-[44px] py-2 font-mono text-xs uppercase tracking-wider transition-all border-r-2 border-foreground last:border-r-0 leading-tight ${
+                      profile.privacy === opt.id ? "bg-foreground text-primary-foreground" : "bg-background text-muted-foreground hover:bg-accent/20"
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <p className="font-mono text-xs text-muted-foreground">Controls who can see your profile on Hub Konnect.</p>
+            </div>
+
+            {/* Sticky save bar */}
+            {hasChanges && (
+              <div className="sticky top-16 z-40 flex items-center justify-between gap-3 border-2 border-foreground bg-accent px-4 py-3 shadow-brutal-sm -mx-4 sm:-mx-6 lg:-mx-0">
+                <p className="font-mono text-xs font-bold uppercase tracking-wider">You have unsaved changes</p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={handleCancel}
+                    className="border-2 border-foreground bg-background font-mono text-xs uppercase h-9">
+                    Discard
+                  </Button>
+                  <Button onClick={handleSave} disabled={saving} size="sm"
+                    className="border-2 border-foreground bg-foreground text-primary-foreground font-mono text-xs uppercase h-9 shadow-brutal-sm">
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Photo */}
             <div className="border-2 border-foreground bg-card p-5 shadow-brutal">
               <Label className="font-mono text-xs font-bold uppercase tracking-wider mb-3 block">Profile Photo</Label>
@@ -516,11 +554,11 @@ const MyProfile = () => {
                 </div>
                 <div className="flex flex-col gap-2 flex-1 min-w-0">
                   <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}
-                    className="border-2 border-foreground font-mono text-[10px] uppercase tracking-wider h-10 sm:h-8 w-full sm:w-auto">Change Photo</Button>
+                    className="border-2 border-foreground font-mono text-xs uppercase tracking-wider h-10 sm:h-8 w-full sm:w-auto">Change Photo</Button>
                   {profile.photoPreview && (
                     <Button type="button" variant="ghost" size="sm"
                       onClick={() => { update({ photoPreview: "" }); setPhotoFile(null); }}
-                      className="font-mono text-[10px] uppercase tracking-wider text-destructive hover:text-destructive h-10 sm:h-8 w-full sm:w-auto">Remove Photo</Button>
+                      className="font-mono text-xs uppercase tracking-wider text-destructive hover:text-destructive h-10 sm:h-8 w-full sm:w-auto">Remove Photo</Button>
                   )}
                 </div>
                 <input ref={fileRef} type="file" accept="image/png,image/jpeg" onChange={handlePhoto} className="hidden" />
@@ -536,10 +574,13 @@ const MyProfile = () => {
 
             {/* Bio */}
             <div className="space-y-1.5">
-              <Label className="font-mono text-xs font-bold uppercase tracking-wider">Bio (150 characters) <span className="text-accent">*</span></Label>
+              <Label className="font-mono text-xs font-bold uppercase tracking-wider">
+                Bio <span className="text-accent">*</span>
+                <span className="font-normal text-muted-foreground ml-1">(up to {BIO_MAX} characters)</span>
+              </Label>
               <Textarea value={profile.bio} onChange={(e) => update({ bio: e.target.value })}
-                className="border-2 border-foreground bg-background font-mono resize-y min-h-[96px]" maxLength={160} />
-              <p className={`font-mono text-[11px] ${bioColor}`}>{bioLength}/150 characters</p>
+                className="border-2 border-foreground bg-background font-mono resize-y min-h-[96px]" maxLength={BIO_MAX} />
+              <p className={`font-mono text-xs ${bioColor}`}>{bioLength}/{BIO_MAX}</p>
             </div>
 
             {/* Member type */}
@@ -550,7 +591,7 @@ const MyProfile = () => {
                   const selected = profile.memberTypes.includes(id);
                   return (
                     <button key={id} type="button" onClick={() => toggleItem("memberTypes", id)}
-                      className={`inline-flex items-center gap-1.5 px-3 py-2 font-mono text-xs border-2 transition-all ${
+                      className={`inline-flex items-center gap-1.5 px-3 py-2 font-mono text-xs border-2 transition-all min-h-[44px] ${
                         selected ? "border-foreground bg-foreground text-primary-foreground" : "border-foreground bg-background hover:bg-accent"
                       }`}>
                       {selected && <Check className="h-3 w-3" />}
@@ -569,14 +610,17 @@ const MyProfile = () => {
 
             {/* Looking for */}
             <div className="border-2 border-foreground bg-card p-5 shadow-brutal space-y-3">
-              <Label className="font-mono text-xs font-bold uppercase tracking-wider">Looking For</Label>
+              <div>
+                <Label className="font-mono text-xs font-bold uppercase tracking-wider">Looking For</Label>
+                <p className="font-mono text-xs text-muted-foreground mt-1">Select what you're hoping to find at The Hub.</p>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {LOOKING_FOR_OPTIONS.map(({ id, title, description, icon }) => {
                   const selected = profile.lookingFor.includes(id);
                   const Icon = LOOKING_FOR_ICONS[icon] || Handshake;
                   return (
                     <button key={id} type="button" onClick={() => toggleItem("lookingFor", id)}
-                      className={`flex items-center gap-3 px-3 py-3 border-2 text-left transition-all ${
+                      className={`flex items-center gap-3 px-3 py-3 border-2 text-left transition-all min-h-[56px] ${
                         selected ? "border-foreground bg-accent shadow-brutal-sm -translate-x-px -translate-y-px" : "border-foreground bg-background hover:bg-accent/10"
                       }`}>
                       {selected ? (
@@ -589,7 +633,7 @@ const MyProfile = () => {
                       <Icon className="h-4 w-4 flex-shrink-0" />
                       <div>
                         <p className="font-mono text-xs font-bold">{title}</p>
-                        <p className="font-mono text-[10px] text-muted-foreground">{description}</p>
+                        <p className="font-mono text-xs text-muted-foreground">{description}</p>
                       </div>
                     </button>
                   );
@@ -617,21 +661,21 @@ const MyProfile = () => {
 
             {/* Save / Cancel */}
             <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-4">
-              <button type="button" onClick={handleCancel}
-                className="font-mono text-sm text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors text-center sm:text-left">
+              <Button type="button" variant="outline" onClick={handleCancel} disabled={!hasChanges}
+                className="border-2 border-foreground font-mono text-sm uppercase tracking-wider h-12 sm:h-11 w-full sm:w-auto">
                 Cancel Changes
-              </button>
+              </Button>
               <Button onClick={handleSave} disabled={!hasChanges || saving}
-                className="w-full sm:w-auto h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm">
+                className="w-full sm:w-auto h-12 sm:h-14 px-5 sm:px-8 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-sm">
                 {saving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
 
-            {/* Danger zone */}
-            <div className="border-2 border-destructive bg-card p-5 mt-12">
-              <h3 className="font-heading text-sm uppercase text-destructive mb-2">Danger Zone</h3>
+            {/* Danger zone — separated with margin */}
+            <div className="mt-16 border-2 border-destructive bg-card p-5">
+              <h3 className="font-heading text-sm uppercase text-destructive mb-1">Danger Zone</h3>
               <p className="font-mono text-xs text-muted-foreground mb-4">
-                Once you delete your account, there is no going back. All your data will be permanently deleted.
+                Permanently deletes your account and all associated data. This cannot be undone.
               </p>
               <Button variant="outline" onClick={() => setShowDeleteModal(true)}
                 className="border-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground font-mono text-xs uppercase tracking-wider h-12 md:h-10 w-full sm:w-auto">
@@ -649,24 +693,24 @@ const MyProfile = () => {
               <p className="font-mono text-xs text-muted-foreground">
                 This action cannot be undone. Type <strong>DELETE</strong> to confirm.
               </p>
-                <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)}
-                  placeholder="Type DELETE" className="border-2 border-foreground bg-background font-mono h-12 md:h-10 text-base" />
-                <div className="flex flex-col-reverse sm:flex-row gap-3 mt-2">
-                  <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
-                    className="flex-1 min-h-[48px] border-2 border-foreground font-mono text-xs uppercase">Cancel</Button>
-                  <Button disabled={deleteText !== "DELETE" || deleting} onClick={async () => {
-                    setDeleting(true);
-                    try {
-                      const { error } = await supabase.rpc("delete_own_account");
-                      if (error) throw error;
-                      await supabase.auth.signOut();
-                      navigate("/");
-                    } catch (err: any) {
-                      toast({ title: "Error", description: err.message || "Failed to delete account", variant: "destructive" });
-                      setDeleting(false);
-                    }
-                  }}
-                  className="flex-1 h-10 border-2 border-destructive bg-destructive text-destructive-foreground font-mono text-xs uppercase hover:bg-destructive/90">
+              <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)}
+                placeholder="Type DELETE" className="border-2 border-foreground bg-background font-mono h-12 text-base" />
+              <div className="flex flex-col-reverse sm:flex-row gap-3 mt-2">
+                <Button variant="outline" onClick={() => { setShowDeleteModal(false); setDeleteText(""); }}
+                  className="flex-1 min-h-[48px] border-2 border-foreground font-mono text-xs uppercase">Cancel</Button>
+                <Button disabled={deleteText !== "DELETE" || deleting} onClick={async () => {
+                  setDeleting(true);
+                  try {
+                    const { error } = await supabase.rpc("delete_own_account");
+                    if (error) throw error;
+                    await supabase.auth.signOut();
+                    navigate("/");
+                  } catch (err: any) {
+                    toast({ title: "Error", description: err.message || "Failed to delete account", variant: "destructive" });
+                    setDeleting(false);
+                  }
+                }}
+                className="flex-1 h-12 border-2 border-destructive bg-destructive text-destructive-foreground font-mono text-xs uppercase hover:bg-destructive/90">
                   {deleting ? "Deleting..." : "Delete My Account"}
                 </Button>
               </div>

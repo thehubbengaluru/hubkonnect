@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { ArrowLeft, Send, MessageCircle, Search, CheckCheck, Check } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Search, CheckCheck, Check, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PageShell from "@/components/PageShell";
 import { useAuth } from "@/contexts/AuthContext";
 import { useConversations, useChatMessages, useSendMessage, useLoadEarlierMessages, useConversationRealtime } from "@/hooks/use-messages";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -55,7 +55,6 @@ const getInitials = (name: string) => name.split(" ").map((n) => n[0]).join("").
 const Messages = () => {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const activeChat = searchParams.get("chat");
   const { data: conversations, isLoading } = useConversations(user?.id);
   useConversationRealtime(user?.id);
@@ -126,8 +125,12 @@ const Messages = () => {
                   {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 border border-foreground" />)}
                 </div>
               ) : !conversations || conversations.length === 0 ? (
-                <div className="p-6 text-center font-mono text-xs text-muted-foreground">
-                  No conversations yet. Connect with someone and start chatting!
+                <div className="p-6 text-center space-y-3">
+                  <Users className="h-8 w-8 mx-auto text-muted-foreground" />
+                  <p className="font-mono text-xs text-muted-foreground">No conversations yet.</p>
+                  <Link to="/connections" className="inline-block font-mono text-xs underline decoration-accent decoration-2 underline-offset-2 hover:text-foreground transition-colors">
+                    Go to Connections to start chatting
+                  </Link>
                 </div>
               ) : filteredConversations.length === 0 ? (
                 <div className="p-6 text-center font-mono text-xs text-muted-foreground">

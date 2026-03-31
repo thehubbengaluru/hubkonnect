@@ -27,10 +27,10 @@ export interface OnboardingData {
 }
 
 const NUDGES = [
-  "Great start! 🚀",
-  "Nice — you're building your network! 🤝",
-  "Almost there! One more step! ⚡",
-  "Let's go! Finish strong! 🎯",
+  "Great start.",
+  "Nice — you're building your network.",
+  "Almost there. One more step.",
+  "Finish strong.",
 ];
 
 const ONBOARDING_STORAGE_KEY = "hubkonnect_onboarding_draft";

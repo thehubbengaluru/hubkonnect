@@ -1,6 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Users, UserCircle, Compass, MessageCircle, Menu, X, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Users, UserCircle, Compass, MessageCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeToggle from "./ThemeToggle";
@@ -15,12 +14,11 @@ const navItems = [
 
 const Navbar = () => {
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { user, profile, signOut } = useAuth();
 
   return (
     <>
-      {/* Desktop navbar */}
+      {/* Top navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b-2 border-foreground">
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
@@ -32,6 +30,7 @@ const Navbar = () => {
             </span>
           </Link>
 
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navItems.map(({ to, label, icon: Icon }) => {
               const active = location.pathname === to;
@@ -53,10 +52,11 @@ const Navbar = () => {
           </nav>
 
           <div className="flex items-center gap-1">
+            {/* Avatar links to profile */}
             {user && profile?.avatar_url && (
-              <div className="h-8 w-8 border-2 border-foreground overflow-hidden">
+              <Link to="/profile" className="h-8 w-8 border-2 border-foreground overflow-hidden hover:shadow-brutal-sm transition-all" aria-label="My profile">
                 <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" loading="lazy" />
-              </div>
+              </Link>
             )}
             <ThemeToggle />
             <NotificationBell />
@@ -64,50 +64,15 @@ const Navbar = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hidden md:flex border-2 border-transparent hover:border-foreground"
+                className="border-2 border-transparent hover:border-foreground"
                 onClick={signOut}
                 title="Sign out"
               >
                 <LogOut className="h-5 w-5" />
               </Button>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden border-2 border-transparent hover:border-foreground"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-expanded={mobileOpen}
-              aria-label="Navigation menu"
-            >
-              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
           </div>
         </div>
-
-        {mobileOpen && (
-          <div className="md:hidden border-t-2 border-foreground bg-background p-4 space-y-1">
-            {navItems.map(({ to, label, icon: Icon }) => (
-              <Link key={to} to={to} onClick={() => setMobileOpen(false)}>
-                <Button
-                  variant={location.pathname === to ? "default" : "ghost"}
-                  className="w-full justify-start gap-2 font-mono text-xs uppercase tracking-wider border-2 border-foreground shadow-brutal-sm mb-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </Button>
-              </Link>
-            ))}
-            {user && (
-              <Button
-                variant="ghost"
-                onClick={() => { signOut(); setMobileOpen(false); }}
-                className="w-full justify-start gap-2 font-mono text-xs uppercase tracking-wider border-2 border-foreground shadow-brutal-sm mb-2 text-destructive"
-              >
-                <LogOut className="h-4 w-4" /> Sign Out
-              </Button>
-            )}
-          </div>
-        )}
       </header>
 
       {/* Mobile bottom nav */}
@@ -119,15 +84,29 @@ const Navbar = () => {
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center gap-1 min-h-[48px] justify-center px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors ${
+                className={`flex flex-col items-center gap-1 min-h-[48px] justify-center px-3 py-1 font-mono text-[10px] uppercase tracking-wider transition-colors relative ${
                   active ? "text-accent" : "text-muted-foreground"
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <div className="relative">
+                  <Icon className="h-5 w-5" />
+                  {/* Show notification badge on messages tab if needed */}
+                </div>
                 <span>{label}</span>
               </Link>
             );
           })}
+          {/* Sign out on mobile */}
+          {user && (
+            <button
+              onClick={signOut}
+              className="flex flex-col items-center gap-1 min-h-[48px] justify-center px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Sign out"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Sign out</span>
+            </button>
+          )}
         </div>
       </nav>
     </>

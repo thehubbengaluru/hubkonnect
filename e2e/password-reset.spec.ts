@@ -34,7 +34,7 @@ test.describe("Password reset flow", () => {
     await page.getByText("Forgot password?").click();
 
     // Should show success toast
-    await expect(page.getByText(/check your inbox/i)).toBeVisible({
+    await expect(page.getByText("Check your inbox", { exact: true })).toBeVisible({
       timeout: 5_000,
     });
   });

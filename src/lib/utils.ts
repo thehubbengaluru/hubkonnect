@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/** Returns true if the given ISO date string is within the last 7 days */
+export function isNewMember(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() < 7 * 24 * 60 * 60 * 1000;
+}
+
 /** Resize an image file to max dimensions, returns a new File */
 export function resizeImage(file: File, maxSize = 500): Promise<File> {
   return new Promise((resolve, reject) => {

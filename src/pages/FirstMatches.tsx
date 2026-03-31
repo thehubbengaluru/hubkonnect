@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageShell from "@/components/PageShell";
 import ProfileCard from "@/components/ProfileCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAllProfiles, useMyProfileDetails, computeMatch } from "@/hooks/use-profiles";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isNewMember } from "@/lib/utils";
 
 const FirstMatches = () => {
   const { user } = useAuth();
@@ -17,7 +19,7 @@ const FirstMatches = () => {
 
   const matchedProfiles = (allProfiles ?? []).map((p) => {
     const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
-    return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
+    return { ...p, matchPercent: match.percent, matchReasons: match.reasons };
   });
 
   const filtered = filterType === "all"
@@ -37,11 +39,12 @@ const FirstMatches = () => {
             <button
               onClick={() => setBannerVisible(false)}
               className="absolute top-3 right-3 text-primary-foreground/60 hover:text-primary-foreground"
+              aria-label="Dismiss"
             >
               <X className="h-5 w-5" />
             </button>
             <h2 className="font-heading text-2xl md:text-3xl uppercase mb-2">
-              Welcome to Hub Konnect! 👋
+              Welcome to Hub Konnect
             </h2>
             <p className="font-mono text-sm text-primary-foreground/70 max-w-xl">
               Here are {sorted.length} people we think you'll vibe with based on your skills, interests, and what you're looking for.
@@ -52,25 +55,28 @@ const FirstMatches = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <h2 className="font-heading text-2xl md:text-3xl uppercase">Your Matches</h2>
           <div className="flex gap-2">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-accent"
-            >
-              <option value="best">Best Match</option>
-              <option value="recent">Recent</option>
-              <option value="active">Most Active</option>
-            </select>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider px-3 py-2 h-10 focus:outline-none focus:ring-2 focus:ring-accent"
-            >
-              <option value="all">All Types</option>
-              <option value="co_living">Co-living</option>
-              <option value="co_working">Co-working</option>
-              <option value="event_attendee">Event Attendees</option>
-            </select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-36 border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider h-10 focus:ring-accent">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-2 border-foreground font-mono text-xs uppercase">
+                <SelectItem value="best" className="font-mono text-xs uppercase tracking-wider">Best Match</SelectItem>
+                <SelectItem value="recent" className="font-mono text-xs uppercase tracking-wider">Recent</SelectItem>
+                <SelectItem value="active" className="font-mono text-xs uppercase tracking-wider">Most Active</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger className="w-36 border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider h-10 focus:ring-accent">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="border-2 border-foreground font-mono text-xs uppercase">
+                <SelectItem value="all" className="font-mono text-xs uppercase tracking-wider">All Types</SelectItem>
+                <SelectItem value="co_living" className="font-mono text-xs uppercase tracking-wider">Co-living</SelectItem>
+                <SelectItem value="co_working" className="font-mono text-xs uppercase tracking-wider">Co-working</SelectItem>
+                <SelectItem value="event_attendee" className="font-mono text-xs uppercase tracking-wider">Events</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -94,8 +100,9 @@ const FirstMatches = () => {
                 handle={match.instagram ? `@${match.instagram.replace("@", "")}` : ""}
                 bio={match.bio}
                 matchPercent={match.matchPercent}
+                matchReasons={match.matchReasons}
                 skills={match.skills}
-                matchReason={match.matchReason}
+                isNew={isNewMember(match.created_at)}
                 initials={match.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()}
                 photoUrl={match.avatar_url || undefined}
               />

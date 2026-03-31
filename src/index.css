@@ -142,3 +142,18 @@
     transform: translate(-2px, -2px);
   }
 }
+
+/* Push Sonner toasts above the mobile bottom nav */
+@media (max-width: 767px) {
+  [data-sonner-toaster] {
+    bottom: 72px !important;
+  }
+}
+
+/* Global focus-visible ring using accent color */
+@layer base {
+  :focus-visible {
+    outline: 2px solid hsl(var(--accent));
+    outline-offset: 2px;
+  }
+}

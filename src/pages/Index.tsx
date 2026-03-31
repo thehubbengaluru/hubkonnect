@@ -52,7 +52,7 @@ const lockedFeatures = [
   { icon: Coffee, title: "Coffee Roulette", description: "Weekly random pairings with conversation starters and auto-scheduled meetups." },
   { icon: Repeat, title: "Skill Swaps", description: "Barter your skills directly — offer video editing, get copywriting in return." },
   { icon: Kanban, title: "Project Boards", description: "Post projects, list roles needed, let people apply with one click." },
-  { icon: UsersRound, title: "Accountability Pods", description: "Join small groups with shared goals. Weekly check-ins for 6 weeks." },
+  { icon: UsersRound, title: "Execution Circles", description: "Join small groups with shared goals. Weekly check-ins for 6 weeks." },
 ];
 
 const Index = () => {
@@ -108,12 +108,7 @@ const Index = () => {
           </h1>
 
           <p className="font-mono text-sm md:text-base text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Stop leaving connections to chance. Turn the people around you at The Hub into project partners who actually ship with you.
-          </p>
-
-          <p className="font-mono text-base md:text-lg text-foreground max-w-lg mx-auto leading-relaxed">
             Connect with creators, founders, and operators at The Hub Bengaluru.
-            <br />
             See curated matches for your next project partner in under 5 minutes.
           </p>
 
@@ -213,7 +208,7 @@ const Index = () => {
               <p className="font-mono text-xs text-primary-foreground/50">Real collaborations, not just follows</p>
             </div>
             <div className="text-center space-y-2">
-              <div className="text-3xl md:text-5xl font-heading">{stats?.avgMatchRate ?? 0}%</div>
+              <div className="text-3xl md:text-5xl font-heading">{stats?.avgMatchRate ? `${stats.avgMatchRate}%` : "--"}</div>
               <div className="font-mono text-xs md:text-sm text-primary-foreground/70 uppercase tracking-wider">Avg Match Rate</div>
               <p className="font-mono text-xs text-primary-foreground/50">Based on skills, interests & goals</p>
             </div>
@@ -234,14 +229,16 @@ const Index = () => {
             {lockedFeatures.map((f) => (
               <div
                 key={f.title}
-                className="border-2 border-foreground/30 bg-card p-6 text-center opacity-80 hover:opacity-100 transition-opacity relative"
+                className="border-2 border-foreground bg-card p-4 sm:p-6 text-center hover:shadow-brutal hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all relative flex flex-col justify-start"
               >
-                <Lock className="absolute top-3 right-3 h-4 w-4 text-muted-foreground" />
-                <div className="h-12 w-12 border-2 border-foreground/30 flex items-center justify-center mx-auto mb-4 bg-secondary">
-                  <f.icon className="h-6 w-6 text-muted-foreground" />
+                <span className="absolute top-3 right-3 font-mono text-[9px] uppercase tracking-wider text-muted-foreground border border-foreground/30 px-1.5 py-0.5 flex items-center gap-1">
+                  <Lock className="h-2.5 w-2.5" /> Soon
+                </span>
+                <div className="h-12 w-12 border-2 border-foreground flex items-center justify-center mx-auto mb-4 bg-accent shrink-0">
+                  <f.icon className="h-6 w-6" />
                 </div>
-                <h3 className="font-heading text-lg uppercase mb-2">{f.title}</h3>
-                <p className="font-mono text-xs text-muted-foreground leading-relaxed">{f.description}</p>
+                <h3 className="font-heading text-base md:text-lg lg:text-base xl:text-lg uppercase mb-2">{f.title}</h3>
+                <p className="font-mono text-xs text-muted-foreground leading-relaxed flex-1">{f.description}</p>
               </div>
             ))}
           </div>
@@ -310,10 +307,7 @@ const Index = () => {
             Hub Konnect by <span className="font-bold text-foreground">The Hub Bengaluru</span>
           </p>
           <div className="flex items-center gap-4 font-mono text-xs">
-            <a href="#" className="text-muted-foreground hover:text-foreground underline underline-offset-2">About</a>
-            <a href="#" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Privacy</a>
-            <a href="#" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Terms</a>
-            <a href="#" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Contact</a>
+            <a href="mailto:hello@thehub.in" className="text-muted-foreground hover:text-foreground underline underline-offset-2">Contact</a>
           </div>
           <p className="font-mono text-xs text-muted-foreground">
             © 2026 The Hub. Built with ❤️ in Bangalore.

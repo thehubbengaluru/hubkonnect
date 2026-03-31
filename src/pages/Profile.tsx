@@ -1,8 +1,10 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Sparkles, Handshake, Lightbulb, Briefcase,
   Instagram, Linkedin, Heart, MessageCircle, Rocket, GraduationCap,
+  Copy, Check as CheckIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import PageShell from "@/components/PageShell";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +23,13 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/profile/${id}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   const { data: profile, isLoading } = useProfileById(id);
   const { data: myProfile } = useMyProfileDetails(user?.id);
   const sendConn = useSendConnection();
@@ -107,11 +116,19 @@ const Profile = () => {
           <div className="text-center space-y-2 mb-6">
             <h1 className="font-heading text-3xl md:text-4xl uppercase">{profile.full_name}</h1>
             {showSocialLinks && profile.instagram && <p className="font-mono text-sm text-muted-foreground">@{profile.instagram.replace("@", "")}</p>}
-            {match && (
-              <div className="inline-flex items-center border-2 border-foreground bg-foreground text-primary-foreground font-mono text-xs font-bold px-3 py-1 shadow-brutal-sm">
-                {match.percent}% Match
-              </div>
-            )}
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              {match && (
+                <div className="inline-flex items-center border-2 border-foreground bg-foreground text-primary-foreground font-mono text-xs font-bold px-3 py-1 shadow-brutal-sm">
+                  {match.percent}% Match
+                </div>
+              )}
+              <button
+                onClick={handleCopyLink}
+                className="inline-flex items-center gap-1.5 font-mono text-xs border-2 border-foreground px-3 py-1 bg-background hover:bg-accent hover:shadow-brutal-sm transition-all"
+              >
+                {copied ? <><CheckIcon className="h-3.5 w-3.5" /> Copied!</> : <><Copy className="h-3.5 w-3.5" /> Copy link</>}
+              </button>
+            </div>
           </div>
 
           {profile.bio && (
@@ -200,26 +217,44 @@ const Profile = () => {
           <div className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t-2 border-foreground p-4 md:pb-4 pb-[5.5rem]">
           <div className="container max-w-3xl flex gap-2 sm:gap-3">
               {isConnected ? (
-                <Button disabled className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
-                  Connected ✓
-                </Button>
+                <>
+                  <Link to={`/messages?chat=${profile.id}`} className="flex-1">
+                    <Button className="w-full h-12 sm:h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
+                      <MessageCircle className="h-4 w-4" /> Message
+                    </Button>
+                  </Link>
+                  <Button disabled variant="outline"
+                    className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider">
+                    Connected ✓
+                  </Button>
+                </>
               ) : hasPending ? (
-                <Button disabled className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
-                  Pending
-                </Button>
+                <>
+                  <Link to="/connections" className="flex-1">
+                    <Button className="w-full h-12 sm:h-14 border-2 border-foreground bg-accent text-accent-foreground font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
+                      Accept Request
+                    </Button>
+                  </Link>
+                  <Button variant="outline" onClick={() => navigate("/for-you")}
+                    className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider hover:bg-card">
+                    Later
+                  </Button>
+                </>
               ) : (
-                <Button onClick={handleConnect} disabled={sendConn.isPending}
-                  className="flex-1 h-12 sm:h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
-                  <span className="hidden sm:inline">Send Connection Request</span>
-                  <span className="sm:hidden">Connect</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+                <>
+                  <Button onClick={handleConnect} disabled={sendConn.isPending}
+                    className="flex-1 h-12 sm:h-14 border-2 border-foreground shadow-brutal hover:shadow-brutal-hover transition-all font-mono font-bold uppercase tracking-wider text-xs sm:text-sm gap-2">
+                    <span className="hidden sm:inline">Send Connection Request</span>
+                    <span className="sm:hidden">Connect</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/for-you")}
+                    className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider hover:bg-card">
+                    <span className="hidden sm:inline">Maybe Later</span>
+                    <span className="sm:hidden">Later</span>
+                  </Button>
+                </>
               )}
-              <Button variant="outline" onClick={() => navigate("/for-you")}
-                className="flex-1 h-12 sm:h-14 border-2 border-foreground font-mono text-xs sm:text-sm uppercase tracking-wider hover:bg-card">
-                <span className="hidden sm:inline">Maybe Later</span>
-                <span className="sm:hidden">Later</span>
-              </Button>
             </div>
           </div>
         )}

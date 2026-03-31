@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
-import { ChevronDown, Calendar, Palette, Users } from "lucide-react";
+import { Users, Calendar, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageShell from "@/components/PageShell";
 import ProfileCard from "@/components/ProfileCard";
 import ConcentricCircles from "@/components/ConcentricCircles";
@@ -11,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveNow } from "@/hooks/use-active-now";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { isNewMember } from "@/lib/utils";
 
 const FILTER_PILLS = ["All", "Co-living", "Co-working", "Events", "Followers"];
 const FILTER_TO_TYPE: Record<string, string> = {
@@ -25,6 +27,7 @@ const ForYou = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [sortBy, setSortBy] = useState("best");
   const [visibleCount, setVisibleCount] = useState(6);
+  const [search, setSearch] = useState("");
 
   const { data: allProfiles, isLoading } = useAllProfiles(user?.id);
   const { data: myProfile } = useMyProfileDetails(user?.id);
@@ -45,16 +48,24 @@ const ForYou = () => {
   const matchedProfiles = useMemo(() =>
     (allProfiles ?? []).map((p) => {
       const match = myProfile ? computeMatch(myProfile, p) : { percent: 70, reasons: ["Hub community member"] };
-      return { ...p, matchPercent: match.percent, matchReason: match.reasons[0] };
+      return { ...p, matchPercent: match.percent, matchReasons: match.reasons };
     }),
     [allProfiles, myProfile]
   );
 
-  // Filter + sort — memoized
+  // Filter + sort + search — memoized
   const visible = useMemo(() => {
-    const filtered = activeFilter === "All"
-      ? matchedProfiles
-      : matchedProfiles.filter((p) => p.member_types.includes(FILTER_TO_TYPE[activeFilter] ?? ""));
+    const q = search.trim().toLowerCase();
+
+    const filtered = matchedProfiles.filter((p) => {
+      const passesType = activeFilter === "All" || p.member_types.includes(FILTER_TO_TYPE[activeFilter] ?? "");
+      const passesSearch = !q || (
+        p.full_name.toLowerCase().includes(q) ||
+        (p.bio ?? "").toLowerCase().includes(q) ||
+        p.skills.some((s) => s.toLowerCase().includes(q))
+      );
+      return passesType && passesSearch;
+    });
 
     const sorted = [...filtered].sort((a, b) => {
       if (sortBy === "best") return b.matchPercent - a.matchPercent;
@@ -68,7 +79,7 @@ const ForYou = () => {
     });
 
     return sorted.slice(0, visibleCount);
-  }, [matchedProfiles, activeFilter, sortBy, visibleCount]);
+  }, [matchedProfiles, activeFilter, sortBy, visibleCount, search]);
 
   const { data: activeNowUsers, isLoading: activeLoading } = useActiveNow();
 
@@ -82,39 +93,64 @@ const ForYou = () => {
             {/* Main feed */}
             <div className="flex-1 min-w-0">
               <h1 className="font-heading text-3xl md:text-4xl uppercase mb-1">For You</h1>
-              <p className="font-mono text-sm text-muted-foreground mb-6">
+              <p className="font-mono text-sm text-muted-foreground mb-4">
                 New matches based on your profile
               </p>
 
-              {/* Filter pills */}
-              <div className="flex items-center gap-3 mb-4 overflow-x-auto pb-2" role="group" aria-label="Filter by member type">
-                {FILTER_PILLS.map((pill) => (
+              {/* Search bar */}
+              <div className="relative mb-5">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setVisibleCount(6); }}
+                  placeholder="Search by name, skill, or bio..."
+                  className="w-full border-2 border-foreground bg-background font-mono text-sm h-11 pl-9 pr-9 focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+                {search && (
                   <button
-                    key={pill}
-                    onClick={() => setActiveFilter(pill)}
-                    aria-pressed={activeFilter === pill}
-                    className={`whitespace-nowrap px-4 py-3 min-h-[44px] sm:min-h-[36px] font-mono text-xs uppercase tracking-wider border-2 transition-all flex items-center justify-center ${
-                      activeFilter === pill
-                        ? "border-foreground bg-foreground text-primary-foreground shadow-brutal-sm"
-                        : "border-foreground bg-background text-foreground hover:bg-accent hover:shadow-brutal-sm"
-                    }`}
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Clear search"
                   >
-                    {pill}
+                    <X className="h-4 w-4" />
                   </button>
-                ))}
+                )}
+              </div>
+
+              {/* Filter pills with scroll-fade indicator */}
+              <div className="relative mb-4">
+                <div className="flex items-center gap-3 overflow-x-auto pb-2 scroll-smooth" role="group" aria-label="Filter by member type"
+                  style={{ maskImage: "linear-gradient(to right, black 80%, transparent 100%)", WebkitMaskImage: "linear-gradient(to right, black 80%, transparent 100%)" }}>
+                  {FILTER_PILLS.map((pill) => (
+                    <button
+                      key={pill}
+                      onClick={() => setActiveFilter(pill)}
+                      aria-pressed={activeFilter === pill}
+                      className={`whitespace-nowrap px-4 py-3 min-h-[44px] sm:min-h-[36px] font-mono text-xs uppercase tracking-wider border-2 transition-all flex items-center justify-center ${
+                        activeFilter === pill
+                          ? "border-foreground bg-foreground text-primary-foreground shadow-brutal-sm"
+                          : "border-foreground bg-background text-foreground hover:bg-accent hover:shadow-brutal-sm"
+                      }`}
+                    >
+                      {pill}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Sort */}
               <div className="flex justify-end mb-6">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider px-3 py-2 h-11 sm:h-9 focus:outline-none focus:ring-2 focus:ring-accent"
-                >
-                  <option value="best">Best Match</option>
-                  <option value="recent">Recent</option>
-                  <option value="active">Most Active</option>
-                </select>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-40 border-2 border-foreground bg-background font-mono text-xs uppercase tracking-wider h-11 sm:h-9 focus:ring-accent">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-2 border-foreground font-mono text-xs uppercase">
+                    <SelectItem value="best" className="font-mono text-xs uppercase tracking-wider">Best Match</SelectItem>
+                    <SelectItem value="recent" className="font-mono text-xs uppercase tracking-wider">Recent</SelectItem>
+                    <SelectItem value="active" className="font-mono text-xs uppercase tracking-wider">Most Active</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Profile cards */}
@@ -128,14 +164,16 @@ const ForYou = () => {
                 <div className="border-2 border-foreground bg-card p-8 text-center shadow-brutal space-y-3">
                   <Users className="h-10 w-10 mx-auto text-muted-foreground" />
                   <p className="font-mono text-sm text-muted-foreground">
-                    {activeFilter !== "All"
-                      ? `No ${activeFilter} members found. Try a different filter!`
+                    {search.trim()
+                      ? `No results for "${search}".`
+                      : activeFilter !== "All"
+                      ? `No ${activeFilter} members found.`
                       : "No matches found yet. More people are joining every day!"}
                   </p>
-                  {activeFilter !== "All" && (
-                    <Button variant="outline" size="sm" onClick={() => setActiveFilter("All")}
+                  {(search.trim() || activeFilter !== "All") && (
+                    <Button variant="outline" size="sm" onClick={() => { setActiveFilter("All"); setSearch(""); }}
                       className="border-2 border-foreground font-mono text-xs uppercase tracking-wider min-h-[44px] sm:min-h-[36px] w-full sm:w-auto">
-                      Show All
+                      Clear filters
                     </Button>
                   )}
                 </div>
@@ -149,8 +187,9 @@ const ForYou = () => {
                       handle=""
                       bio={match.bio}
                       matchPercent={match.matchPercent}
+                      matchReasons={match.matchReasons}
                       skills={match.skills}
-                      matchReason={match.matchReason}
+                      isNew={isNewMember(match.created_at)}
                       initials={match.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()}
                       photoUrl={match.avatar_url || undefined}
                       connectionStatus={getConnectionStatus(match.id)}
@@ -167,7 +206,7 @@ const ForYou = () => {
                     onClick={() => setVisibleCount((c) => c + 6)}
                     className="w-full h-12 border-2 border-foreground font-mono text-xs uppercase tracking-wider hover:bg-accent hover:shadow-brutal-sm transition-all"
                   >
-                    Load More Matches
+                    Load More ({Math.min(6, matchedProfiles.length - visibleCount)} of {matchedProfiles.length - visibleCount} remaining)
                   </Button>
                 </div>
               )}
@@ -178,20 +217,16 @@ const ForYou = () => {
               {/* Stats */}
               <div className="border-2 border-foreground bg-card p-5 shadow-brutal">
                 <h3 className="font-heading text-base uppercase mb-4">Your Community</h3>
-                <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="grid grid-cols-2 gap-2 text-center">
                   <div>
                     <p className="font-heading text-2xl">{(allProfiles ?? []).length}</p>
-                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Total Matches</p>
+                    <p className="font-mono text-[10px] uppercase text-muted-foreground">Members</p>
                   </div>
-                  <div className="border-l-2 border-r-2 border-foreground">
-                    <p className="font-heading text-2xl">{Math.min((allProfiles ?? []).length, 3)}</p>
-                    <p className="font-mono text-[10px] uppercase text-muted-foreground">This Week</p>
-                  </div>
-                  <div>
+                  <div className="border-l-2 border-foreground">
                     <p className="font-heading text-2xl">
                       {matchedProfiles.length > 0
-                        ? Math.round(matchedProfiles.reduce((s, p) => s + p.matchPercent, 0) / matchedProfiles.length)
-                        : 0}%
+                        ? `${Math.round(matchedProfiles.reduce((s, p) => s + p.matchPercent, 0) / matchedProfiles.length)}%`
+                        : "--"}
                     </p>
                     <p className="font-mono text-[10px] uppercase text-muted-foreground">Avg Match</p>
                   </div>
@@ -237,17 +272,14 @@ const ForYou = () => {
                 )}
               </div>
 
-              {/* Upcoming events */}
+              {/* Hub tip */}
               <div className="border-2 border-foreground bg-card p-5 shadow-brutal">
-                <h3 className="font-heading text-sm uppercase mb-3">Upcoming Events</h3>
-                <div className="space-y-3">
-                  <div className="border-l-[3px] border-accent bg-accent/10 px-3 py-2">
-                    <p className="font-mono text-sm font-bold flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" /> Creative Mixer
-                    </p>
-                    <p className="font-mono text-[11px] text-muted-foreground">Friday, 7 PM</p>
-                  </div>
-                </div>
+                <h3 className="font-heading text-sm uppercase mb-3 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" /> Hub Events
+                </h3>
+                <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                  Check The Hub's notice board or ask the front desk for this week's events and meetups.
+                </p>
               </div>
             </aside>
           </div>
