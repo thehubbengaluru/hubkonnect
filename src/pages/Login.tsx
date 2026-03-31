@@ -48,8 +48,8 @@ const Login = () => {
         <div className="border-2 border-foreground bg-background shadow-brutal-lg p-6 md:p-10 space-y-6">
           {/* Header */}
           <div className="text-center space-y-3">
-            <div className="inline-flex h-14 w-14 border-2 border-foreground bg-accent items-center justify-center mx-auto shadow-brutal-sm">
-              <span className="font-heading text-2xl">H</span>
+            <div className="inline-flex mx-auto">
+              <img src="/thb-logo.png" alt="HubKonnect Logo" className="h-14 w-14 object-contain" />
             </div>
             <h1 className="font-heading text-2xl md:text-3xl uppercase">Welcome back! 👋</h1>
             <p className="font-mono text-sm text-muted-foreground">Log in to continue connecting</p>
